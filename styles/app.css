@@ -1,0 +1,42 @@
+html, body {
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+#render-canvas {
+    width: 100%;
+    height: 100%;
+    margin: 0px;
+    touch-action: none;
+}
+
+#fighters-order {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    z-index: 1;
+}
+
+.fighter-order-element {
+    display: inline-block;
+    border: 1px solid;
+}
+
+#button-delay {
+    position: fixed;
+    bottom: 10px;
+    left: 10px;
+    z-index: 1;
+    font-size: 40px;
+}
+
+#button-end-turn {
+    position: fixed;
+    bottom: 10px;
+    left: 200px;
+    z-index: 1;
+    font-size: 40px;
+}

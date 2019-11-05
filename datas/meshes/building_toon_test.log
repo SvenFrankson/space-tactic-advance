@@ -1,0 +1,107 @@
+Exporter version: 6.2.0, Blender version: 2.80 (sub 75)
+========= Conversion from Blender to Babylon.js =========
+	Scene settings used :
+		inline textures     :  false
+		Material Type       :  PBR
+		Positions Precision :  4
+		Normals Precision   :  3
+		UVs Precision       :  3
+		Vert Color Precision:  3
+		Mat Weight Precision:  2
+		texture directory   :  C:\Users\svent\Documents\SvenFrankson\citygen\datas\meshes\
+	Python World class constructor completed
+	WARNING: No active camera has been assigned, or is not in a currently selected Blender layer
+	processing begun of mesh:  wall-border
+		WARNING: No materials have been assigned: 
+		num positions      :  205
+		num normals        :  205
+		num tangents       :  0
+		num uvs            :  410
+		num uvs2           :  0
+		num colors         :  0
+		num indices        :  240
+	processing begun of mesh:  roof-border
+		WARNING: No materials have been assigned: 
+		num positions      :  68
+		num normals        :  68
+		num tangents       :  0
+		num uvs            :  136
+		num uvs2           :  0
+		num colors         :  0
+		num indices        :  84
+	processing begun of mesh:  roof-top
+		WARNING: No materials have been assigned: 
+		num positions      :  30
+		num normals        :  30
+		num tangents       :  0
+		num uvs            :  60
+		num uvs2           :  0
+		num colors         :  0
+		num indices        :  36
+	processing begun of mesh:  wall-main
+		WARNING: No materials have been assigned: 
+		num positions      :  16
+		num normals        :  16
+		num tangents       :  0
+		num uvs            :  32
+		num uvs2           :  0
+		num colors         :  0
+		num indices        :  24
+	processing begun of mesh:  wall-column
+		WARNING: No materials have been assigned: 
+		num positions      :  72
+		num normals        :  72
+		num tangents       :  0
+		num uvs            :  144
+		num uvs2           :  0
+		num colors         :  0
+		num indices        :  96
+	processing begun of mesh:  wall-main-shadow
+		WARNING: No materials have been assigned: 
+		num positions      :  64
+		num normals        :  64
+		num tangents       :  0
+		num uvs            :  128
+		num uvs2           :  0
+		num colors         :  0
+		num indices        :  216
+	processing begun of mesh:  window
+		WARNING: No materials have been assigned: 
+		num positions      :  68
+		num normals        :  68
+		num tangents       :  0
+		num uvs            :  136
+		num uvs2           :  0
+		num colors         :  0
+		num indices        :  84
+	processing begun of mesh:  window-glass
+		WARNING: No materials have been assigned: 
+		num positions      :  4
+		num normals        :  4
+		num tangents       :  0
+		num uvs            :  8
+		num uvs2           :  0
+		num colors         :  0
+		num indices        :  6
+	processing begun of mesh:  window-forge
+		WARNING: No materials have been assigned: 
+		num positions      :  61
+		num normals        :  61
+		num tangents       :  0
+		num uvs            :  122
+		num uvs2           :  0
+		num colors         :  0
+		num indices        :  72
+========= Writing of JSON file started =========
+	writing mesh:  wall-border
+	writing mesh:  roof-border
+	writing mesh:  roof-top
+	writing mesh:  wall-main
+	writing mesh:  wall-column
+	writing mesh:  wall-main-shadow
+	writing mesh:  window
+	writing mesh:  window-glass
+	writing mesh:  window-forge
+========= Writing of JSON file completed =========
+========= end of processing =========
+elapsed time:  0 min, 0.12 secs
