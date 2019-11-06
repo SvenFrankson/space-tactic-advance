@@ -99,6 +99,7 @@ class Client implements IClient {
     public attackFighter(fighterId: number, targetId: number): void {
         let fighter = this.getFighterByID(fighterId);
         if (fighter) {
+            fighter.hasAttacked = true;
             let target = this.getFighterByID(targetId);
             if (target) {
                 this.onFighterHasAttacked(fighter, target);
@@ -110,6 +111,7 @@ class Client implements IClient {
     public woundFighter(fighterId: number, amount: number): void {
         let fighter = this.getFighterByID(fighterId);
         if (fighter) {
+            fighter.hp -= amount;
             this.onFighterWounded(fighter, amount);
         }
     }

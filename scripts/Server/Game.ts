@@ -30,14 +30,14 @@ class Game {
         for (let i = 0; i < 3; i++) {
             let team0Fighter = new Fighter(0);
             team0Fighter.initialize();
-            let tile = this._board.getTileByIJ(-5, - 1 + i);
+            let tile = this._board.getTileByIJ(-3, - 1 + 2 * i);
             tile.setFighter(team0Fighter);
             this._fighters.push(team0Fighter);
         }
         for (let i = 0; i < 3; i++) {
             let team1Fighter = new Fighter(1);
             team1Fighter.initialize();
-            let tile = this._board.getTileByIJ(5, - 1 + i);
+            let tile = this._board.getTileByIJ(3, - 1 + 2 * i);
             tile.setFighter(team1Fighter);
             this._fighters.push(team1Fighter);
         }
@@ -136,6 +136,33 @@ class Game {
 
     public requestAttack(fighterId: number, targetId: number): boolean {
         this._log.log("requestAttack " + fighterId + " " + targetId);
+        let fighter = this.getFighterByID(fighterId);
+        if (fighter === this.getActiveFighter()) {
+            if (!fighter.hasAttacked) {
+                let target = this.getFighterByID(targetId);
+                if (target) {
+                    if (HexagonMath.Distance(fighter.tileI, fighter.tileJ, target.tileI, target.tileJ) <= 1) {
+                        target.hp -= fighter.power;
+
+                        // Trigger event.
+                        this._clients.forEach(
+                            c => {
+                                c.attackFighter(fighterId, targetId);
+                            }
+                        )
+
+                        this._clients.forEach(
+                            c => {
+                                c.woundFighter(targetId, fighter.power);
+                            }
+                        )
+                        
+                        this._log.log("requestAttack success");
+                        return true;
+                    }
+                }
+            }
+        }
         this._log.log("requestAttack failure");
         return false;
     }

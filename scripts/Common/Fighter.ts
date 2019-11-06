@@ -21,6 +21,16 @@ class Fighter {
     public hp: number = 10;
 
     protected _tile: Tile;
+    public get tileI(): number {
+        if (this._tile) {
+            return this._tile.i;
+        }
+    }
+    public get tileJ(): number {
+        if (this._tile) {
+            return this._tile.j;
+        }
+    }
 
     public hasMoved: boolean = false;
     public hasAttacked: boolean = false;

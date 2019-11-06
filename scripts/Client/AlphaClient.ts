@@ -15,6 +15,18 @@ class AlphaClient extends Client {
         AlphaClient.Instance = this;
 
         this._board = new AlphaBoard();
+        new AlphaFighterSelector();
+    }
+
+    public findFighter(filter: (f: AlphaFighter) => boolean): AlphaFighter {
+        for (let i = 0; i < this._fighters.length; i++) {
+            let fighter = this._fighters[i];
+            if (fighter instanceof AlphaFighter) {
+                if (filter(fighter)) {
+                    return fighter;
+                }
+            }
+        }
     }
 
     protected onBoardInitialized(): void {
@@ -96,8 +108,22 @@ class AlphaClient extends Client {
         }
     }
 
-    protected onFighterHasAttacked(fighter: Fighter, target: Fighter) {};
-    protected onFighterWounded(fighter: Fighter, amount: number) {};
+
+    protected onFighterHasAttacked(fighter: Fighter, target: Fighter): void {
+        if (fighter instanceof AlphaFighter) {
+            fighter.updateMesh(Main.Scene);
+            if (fighter === this.getActiveFighter()) {
+                fighter.onAfterFighterAttacked();
+            }
+        }
+    }
+
+    protected onFighterWounded(fighter: Fighter, amount: number) {
+        if (fighter instanceof AlphaFighter) {
+            fighter.updateHitPointMesh();
+        }
+    };
+
     protected onFighterKilled(fighter: Fighter) {};
 
     protected onFighterPhaseDelayed(fighter: Fighter): void {
