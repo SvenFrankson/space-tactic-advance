@@ -69,16 +69,17 @@ class Client implements IClient {
     protected onFighterOrderUpdated(): void {}
 
     public initializeTurn(): void {
+        for (let i = 0; i < this._fighters.length; i++) {
+            let fighter = this._fighters[i];
+            fighter.hasMoved = false;
+            fighter.hasAttacked = false;
+            fighter.shield = Math.min(fighter.shieldCapacity, fighter.shield + fighter.shieldSpeed);
+        }
         this.onTurnInitialized();
     }
     protected onTurnInitialized(): void {};
 
     public initializePhase(): void {
-        let fighter = this.getActiveFighter();
-        if (fighter) {
-            fighter.hasMoved = false;
-            fighter.hasAttacked = false;
-        }
         this.onPhaseInitialized();
     }
     protected onPhaseInitialized(): void {};
@@ -96,26 +97,27 @@ class Client implements IClient {
     }
     protected onFighterMoved(fighter: Fighter): void {}
 
-    public attackFighter(fighterId: number, targetId: number): void {
+    public attackFighter(fighterId: number, targetId: number, result: number): void {
         let fighter = this.getFighterByID(fighterId);
         if (fighter) {
             fighter.hasAttacked = true;
             let target = this.getFighterByID(targetId);
             if (target) {
-                this.onFighterHasAttacked(fighter, target);
+                this.onFighterHasAttacked(fighter, target, result);
             }
         }
     }
-    protected onFighterHasAttacked(fighter: Fighter, target: Fighter) {};
+    protected onFighterHasAttacked(fighter: Fighter, target: Fighter, result: number) {};
 
-    public woundFighter(fighterId: number, amount: number): void {
+    public updateFighterHPShield(fighterId: number, hp: number, shield: number): void {
         let fighter = this.getFighterByID(fighterId);
         if (fighter) {
-            fighter.hp -= amount;
-            this.onFighterWounded(fighter, amount);
+            fighter.hp = hp;
+            fighter.shield = shield;
+            this.onFighterHPShieldUpdated(fighter);
         }
     }
-    protected onFighterWounded(fighter: Fighter, amount: number) {};
+    protected onFighterHPShieldUpdated(fighter: Fighter) {};
 
     public killFighter(fighterId: number): void {
         let fighter = this.getFighterByID(fighterId);

@@ -67,6 +67,7 @@ class Game {
             f => {
                 f.hasMoved = false;
                 f.hasAttacked = false;
+                f.shield = Math.min(f.shieldCapacity, f.shield + f.shieldSpeed);
             }
         )
 
@@ -76,6 +77,12 @@ class Game {
                 c.updateFightersOrder(this._fighterOrder);
             }
         )
+
+        this._clients.forEach(
+            c => {
+                c.initializeTurn();
+            }
+        ) 
 
         this._clients.forEach(
             c => {
@@ -142,18 +149,44 @@ class Game {
                 let target = this.getFighterByID(targetId);
                 if (target) {
                     if (HexagonMath.Distance(fighter.tileI, fighter.tileJ, target.tileI, target.tileJ) <= 1) {
-                        target.hp -= fighter.power;
+                        let rand = Math.random() * 100;
+                        let result = 0;
+                        let damage = fighter.attackPower;
+
+                        if (rand > 100 - fighter.criticalRate) {
+                            result = 2;
+                            damage *= 2;
+                        }
+                        else if (rand > 100 - fighter.accuracy + target.dodgeRate) {
+                            result = 1;
+                        }
+
+                        if (result !== 0) {
+                            if (damage < target.shield) {
+                                target.shield -= damage;
+                                damage = 0;
+                            }
+                            else {
+                                damage -= target.shield;
+                                target.shield = 0;
+                            }
+
+                            damage -= target.armor;
+                            if (damage > 0) {
+                                target.hp -= damage;
+                            }
+                        }
 
                         // Trigger event.
                         this._clients.forEach(
                             c => {
-                                c.attackFighter(fighterId, targetId);
+                                c.attackFighter(fighterId, targetId, result);
                             }
                         )
 
                         this._clients.forEach(
                             c => {
-                                c.woundFighter(targetId, fighter.power);
+                                c.updateFighterHPShield(targetId, target.hp, target.shield);
                             }
                         )
                         

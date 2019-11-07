@@ -421,16 +421,17 @@ class Client {
     }
     onFighterOrderUpdated() { }
     initializeTurn() {
+        for (let i = 0; i < this._fighters.length; i++) {
+            let fighter = this._fighters[i];
+            fighter.hasMoved = false;
+            fighter.hasAttacked = false;
+            fighter.shield = Math.min(fighter.shieldCapacity, fighter.shield + fighter.shieldSpeed);
+        }
         this.onTurnInitialized();
     }
     onTurnInitialized() { }
     ;
     initializePhase() {
-        let fighter = this.getActiveFighter();
-        if (fighter) {
-            fighter.hasMoved = false;
-            fighter.hasAttacked = false;
-        }
         this.onPhaseInitialized();
     }
     onPhaseInitialized() { }
@@ -447,26 +448,27 @@ class Client {
         }
     }
     onFighterMoved(fighter) { }
-    attackFighter(fighterId, targetId) {
+    attackFighter(fighterId, targetId, result) {
         let fighter = this.getFighterByID(fighterId);
         if (fighter) {
             fighter.hasAttacked = true;
             let target = this.getFighterByID(targetId);
             if (target) {
-                this.onFighterHasAttacked(fighter, target);
+                this.onFighterHasAttacked(fighter, target, result);
             }
         }
     }
-    onFighterHasAttacked(fighter, target) { }
+    onFighterHasAttacked(fighter, target, result) { }
     ;
-    woundFighter(fighterId, amount) {
+    updateFighterHPShield(fighterId, hp, shield) {
         let fighter = this.getFighterByID(fighterId);
         if (fighter) {
-            fighter.hp -= amount;
-            this.onFighterWounded(fighter, amount);
+            fighter.hp = hp;
+            fighter.shield = shield;
+            this.onFighterHPShieldUpdated(fighter);
         }
     }
-    onFighterWounded(fighter, amount) { }
+    onFighterHPShieldUpdated(fighter) { }
     ;
     killFighter(fighterId) {
         let fighter = this.getFighterByID(fighterId);
@@ -583,6 +585,13 @@ class AlphaClient extends Client {
             container.appendChild(dElement);
         }
     }
+    onTurnInitialized() {
+        for (let i = 0; i < this._fighters.length; i++) {
+            let fighter = this._fighters[i];
+            fighter.updateHitPointMesh();
+        }
+    }
+    ;
     onPhaseInitialized() {
         let activeFighter = this.getActiveFighter();
         if (activeFighter) {
@@ -600,7 +609,7 @@ class AlphaClient extends Client {
             }
         }
     }
-    onFighterHasAttacked(fighter, target) {
+    onFighterHasAttacked(fighter, target, result) {
         if (fighter instanceof AlphaFighter) {
             fighter.updateMesh(Main.Scene);
             if (fighter === this.getActiveFighter()) {
@@ -608,7 +617,7 @@ class AlphaClient extends Client {
             }
         }
     }
-    onFighterWounded(fighter, amount) {
+    onFighterHPShieldUpdated(fighter) {
         if (fighter instanceof AlphaFighter) {
             fighter.updateHitPointMesh();
         }
@@ -633,10 +642,19 @@ class IFighterData {
 class Fighter {
     constructor(team) {
         this.speed = 10;
-        this.range = 3;
         this.stamina = 10;
-        this.power = 3;
+        this.shieldCapacity = 6;
+        this.shieldSpeed = 2;
+        this.armor = 1;
+        this.moveRange = 3;
+        this.attackRange = 3;
+        this.attackPower = 3;
+        this.accuracy = 95;
+        this.staticAttack = false;
+        this.criticalRate = 5;
+        this.dodgeRate = 10;
         this.hp = 10;
+        this.shield = 6;
         this.hasMoved = false;
         this.hasAttacked = false;
         this.id = Fighter.ID;
@@ -655,9 +673,6 @@ class Fighter {
     }
     initialize() {
         this.speed = Math.floor(Math.random() * 100);
-        this.range = Math.floor(Math.random() * 3 + 2);
-        this.stamina = Math.floor(Math.random() * 3) * 5 + 10;
-        this.power = Math.floor(Math.random() * 5 + 2);
     }
     setTile(t) {
         if (this._tile) {
@@ -672,7 +687,18 @@ class Fighter {
         let data = {
             id: this.id,
             team: this.team,
-            speed: this.speed
+            speed: this.speed,
+            stamina: this.stamina,
+            shieldCapacity: this.shieldCapacity,
+            shieldSpeed: this.shieldSpeed,
+            armor: this.armor,
+            moveRange: this.moveRange,
+            attackRange: this.attackRange,
+            attackPower: this.attackPower,
+            accuracy: this.accuracy,
+            staticAttack: this.staticAttack,
+            criticalRate: this.criticalRate,
+            dodgeRate: this.dodgeRate
         };
         if (this._tile) {
             data.i = this._tile.i;
@@ -681,9 +707,20 @@ class Fighter {
         return data;
     }
     static deserialize(data, fighter) {
-        fighter.team = data.team;
         fighter.id = data.id;
+        fighter.team = data.team;
         fighter.speed = data.speed;
+        fighter.stamina = data.stamina;
+        fighter.shieldCapacity = data.shieldCapacity;
+        fighter.shieldSpeed = data.shieldSpeed;
+        fighter.armor = data.armor;
+        fighter.moveRange = data.moveRange;
+        fighter.attackRange = data.attackRange;
+        fighter.attackPower = data.attackPower;
+        fighter.accuracy = data.accuracy;
+        fighter.staticAttack = data.staticAttack;
+        fighter.criticalRate = data.criticalRate;
+        fighter.dodgeRate = data.dodgeRate;
         return fighter;
     }
 }
@@ -1063,16 +1100,18 @@ class AlphaFighter extends Fighter {
             this._hpLostMesh.parent = this.transformMesh;
             this._hpLostMesh.material = Main.redMaterial;
         }
+        if (!this._shieldLeftMesh) {
+            this._shieldLeftMesh = new BABYLON.Mesh("shield-left-" + this.id);
+            this._shieldLeftMesh.parent = this.transformMesh;
+            this._shieldLeftMesh.position.y = -0.001;
+            this._shieldLeftMesh.material = Main.cyanMaterial;
+        }
         if (!this._selectionMesh) {
             this._selectionMesh = new BABYLON.Mesh("selection-" + this.id);
             this._selectionMesh.parent = this.transformMesh;
-            SpaceMeshBuilder.CreateHexagonVertexData(0.15, 0.27).applyToMesh(this._selectionMesh);
-            if (this.team === 0) {
-                this._selectionMesh.material = Main.blueMaterial;
-            }
-            else if (this.team === 1) {
-                this._selectionMesh.material = Main.redMaterial;
-            }
+            this._selectionMesh.position.y = -0.001;
+            SpaceMeshBuilder.CreateHexagonVertexData(0.33, 0.43).applyToMesh(this._selectionMesh);
+            this._selectionMesh.material = Main.whiteMaterial;
             this._selectionMesh.isVisible = false;
         }
         this.transformMesh.position.x = 0.75 * this._tile.i;
@@ -1080,22 +1119,37 @@ class AlphaFighter extends Fighter {
         this.updateHitPointMesh();
     }
     updateHitPointMesh() {
-        let ratio = this.hp / this.stamina;
-        if (ratio <= 0) {
+        let ratioHP = this.hp / this.stamina;
+        if (ratioHP <= 0) {
             this._hpLeftMesh.isVisible = false;
             this._hpLostMesh.isVisible = true;
             SpaceMeshBuilder.CreateHPBar(0.33, 0.12, 0, 1).applyToMesh(this._hpLostMesh);
         }
-        else if (ratio >= 1) {
+        else if (ratioHP >= 1) {
             this._hpLeftMesh.isVisible = true;
             SpaceMeshBuilder.CreateHPBar(0.33, 0.12, 0, 1).applyToMesh(this._hpLeftMesh);
             this._hpLostMesh.isVisible = false;
         }
         else {
             this._hpLeftMesh.isVisible = true;
-            SpaceMeshBuilder.CreateHPBar(0.33, 0.12, 0, ratio).applyToMesh(this._hpLeftMesh);
+            SpaceMeshBuilder.CreateHPBar(0.33, 0.12, 0, ratioHP).applyToMesh(this._hpLeftMesh);
             this._hpLostMesh.isVisible = true;
-            SpaceMeshBuilder.CreateHPBar(0.33, 0.12, ratio, 1).applyToMesh(this._hpLostMesh);
+            SpaceMeshBuilder.CreateHPBar(0.33, 0.12, ratioHP, 1).applyToMesh(this._hpLostMesh);
+        }
+        let ratioShield = 0;
+        if (this.shieldCapacity > 0) {
+            ratioShield = this.shield / this.shieldCapacity;
+        }
+        if (ratioShield <= 0) {
+            this._shieldLeftMesh.isVisible = false;
+        }
+        else if (ratioShield >= 1) {
+            this._shieldLeftMesh.isVisible = true;
+            SpaceMeshBuilder.CreateHPBar(0.33, 0.18, 0, 1).applyToMesh(this._shieldLeftMesh);
+        }
+        else {
+            this._shieldLeftMesh.isVisible = true;
+            SpaceMeshBuilder.CreateHPBar(0.33, 0.18, 0, ratioShield).applyToMesh(this._shieldLeftMesh);
         }
     }
     updateTurnStatus(status) {
@@ -1387,6 +1441,9 @@ class Main {
     }
     async initializeScene() {
         Main.Scene = new BABYLON.Scene(Main.Engine);
+        Main.whiteMaterial = new BABYLON.StandardMaterial("white-material", Main.Scene);
+        Main.whiteMaterial.diffuseColor.copyFromFloats(1, 1, 1);
+        Main.whiteMaterial.specularColor.copyFromFloats(0.3, 0.3, 0.3);
         Main.redMaterial = new BABYLON.StandardMaterial("red-material", Main.Scene);
         Main.redMaterial.diffuseColor.copyFromFloats(1, 0, 0);
         Main.redMaterial.specularColor.copyFromFloats(0.3, 0.3, 0.3);
@@ -1402,6 +1459,9 @@ class Main {
         Main.yellowMaterial = new BABYLON.StandardMaterial("yellow-material", Main.Scene);
         Main.yellowMaterial.diffuseColor.copyFromFloats(1, 1, 0);
         Main.yellowMaterial.specularColor.copyFromFloats(0.3, 0.3, 0.3);
+        Main.cyanMaterial = new BABYLON.StandardMaterial("cyan-material", Main.Scene);
+        Main.cyanMaterial.diffuseColor.copyFromFloats(0, 1, 1);
+        Main.cyanMaterial.specularColor.copyFromFloats(0.3, 0.3, 0.3);
         this.initializeCamera();
         Main.Camera.minZ = 0.2;
         Main.Camera.maxZ = 2000;
@@ -2101,10 +2161,14 @@ class Game {
         this._fighters.forEach(f => {
             f.hasMoved = false;
             f.hasAttacked = false;
+            f.shield = Math.min(f.shieldCapacity, f.shield + f.shieldSpeed);
         });
         // Trigger event.
         this._clients.forEach(c => {
             c.updateFightersOrder(this._fighterOrder);
+        });
+        this._clients.forEach(c => {
+            c.initializeTurn();
         });
         this._clients.forEach(c => {
             c.initializePhase();
@@ -2160,13 +2224,36 @@ class Game {
                 let target = this.getFighterByID(targetId);
                 if (target) {
                     if (HexagonMath.Distance(fighter.tileI, fighter.tileJ, target.tileI, target.tileJ) <= 1) {
-                        target.hp -= fighter.power;
+                        let rand = Math.random() * 100;
+                        let result = 0;
+                        let damage = fighter.attackPower;
+                        if (rand > 100 - fighter.criticalRate) {
+                            result = 2;
+                            damage *= 2;
+                        }
+                        else if (rand > 100 - fighter.accuracy + target.dodgeRate) {
+                            result = 1;
+                        }
+                        if (result !== 0) {
+                            if (damage < target.shield) {
+                                target.shield -= damage;
+                                damage = 0;
+                            }
+                            else {
+                                damage -= target.shield;
+                                target.shield = 0;
+                            }
+                            damage -= target.armor;
+                            if (damage > 0) {
+                                target.hp -= damage;
+                            }
+                        }
                         // Trigger event.
                         this._clients.forEach(c => {
-                            c.attackFighter(fighterId, targetId);
+                            c.attackFighter(fighterId, targetId, result);
                         });
                         this._clients.forEach(c => {
-                            c.woundFighter(targetId, fighter.power);
+                            c.updateFighterHPShield(targetId, target.hp, target.shield);
                         });
                         this._log.log("requestAttack success");
                         return true;

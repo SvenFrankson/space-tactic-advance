@@ -90,6 +90,13 @@ class AlphaClient extends Client {
         }
     }
 
+    protected onTurnInitialized(): void {
+        for (let i = 0; i <this._fighters.length; i++) {
+            let fighter = this._fighters[i] as AlphaFighter;
+            fighter.updateHitPointMesh();
+        }
+    };
+
     protected onPhaseInitialized(): void {
         let activeFighter = this.getActiveFighter() as AlphaFighter;
         if (activeFighter) {
@@ -109,7 +116,7 @@ class AlphaClient extends Client {
     }
 
 
-    protected onFighterHasAttacked(fighter: Fighter, target: Fighter): void {
+    protected onFighterHasAttacked(fighter: Fighter, target: Fighter, result: number): void {
         if (fighter instanceof AlphaFighter) {
             fighter.updateMesh(Main.Scene);
             if (fighter === this.getActiveFighter()) {
@@ -118,7 +125,7 @@ class AlphaClient extends Client {
         }
     }
 
-    protected onFighterWounded(fighter: Fighter, amount: number) {
+    protected onFighterHPShieldUpdated(fighter: Fighter) {
         if (fighter instanceof AlphaFighter) {
             fighter.updateHitPointMesh();
         }

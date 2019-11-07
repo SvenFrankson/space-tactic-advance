@@ -6,8 +6,8 @@ interface IClient {
     initializeTurn(): void;
     initializePhase(): void;
     moveFighter(fightersId: number, i: number, j: number): void;
-    attackFighter(fightersId: number, targetId: number): void;
-    woundFighter(fightersId: number, amount: number): void;
+    attackFighter(fightersId: number, targetId: number, result: number): void;
+    updateFighterHPShield(fighterId: number, hp: number, shield: number): void;
     killFighter(fightersId: number): void;
     delayFighterPhase(fightersId: number): void;
     endFighterPhase(fighterId: number): void;

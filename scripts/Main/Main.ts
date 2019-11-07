@@ -27,11 +27,13 @@ class Main {
 		return Main._terrainCellShadingMaterial;
 	}
 
+	public static whiteMaterial: BABYLON.StandardMaterial;
 	public static redMaterial: BABYLON.StandardMaterial;
 	public static greenMaterial: BABYLON.StandardMaterial;
 	public static blueMaterial: BABYLON.StandardMaterial;
 	public static greyMaterial: BABYLON.StandardMaterial;
 	public static yellowMaterial: BABYLON.StandardMaterial;
+	public static cyanMaterial: BABYLON.StandardMaterial;
 
     constructor(canvasElement: string) {
         Main.Canvas = document.getElementById(canvasElement) as HTMLCanvasElement;
@@ -55,6 +57,9 @@ class Main {
     public async initializeScene(): Promise<void> {
 		Main.Scene = new BABYLON.Scene(Main.Engine);
 
+		Main.whiteMaterial = new BABYLON.StandardMaterial("white-material", Main.Scene);
+		Main.whiteMaterial.diffuseColor.copyFromFloats(1, 1, 1);
+		Main.whiteMaterial.specularColor.copyFromFloats(0.3, 0.3, 0.3);
 		Main.redMaterial = new BABYLON.StandardMaterial("red-material", Main.Scene);
 		Main.redMaterial.diffuseColor.copyFromFloats(1, 0, 0);
 		Main.redMaterial.specularColor.copyFromFloats(0.3, 0.3, 0.3);
@@ -70,6 +75,9 @@ class Main {
 		Main.yellowMaterial = new BABYLON.StandardMaterial("yellow-material", Main.Scene);
 		Main.yellowMaterial.diffuseColor.copyFromFloats(1, 1, 0);
 		Main.yellowMaterial.specularColor.copyFromFloats(0.3, 0.3, 0.3);
+		Main.cyanMaterial = new BABYLON.StandardMaterial("cyan-material", Main.Scene);
+		Main.cyanMaterial.diffuseColor.copyFromFloats(0, 1, 1);
+		Main.cyanMaterial.specularColor.copyFromFloats(0.3, 0.3, 0.3);
 
 		this.initializeCamera();
 		Main.Camera.minZ = 0.2;

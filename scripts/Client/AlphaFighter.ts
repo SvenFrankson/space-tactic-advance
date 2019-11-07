@@ -59,6 +59,7 @@ class AlphaFighter extends Fighter {
     private _fighterMesh: BABYLON.Mesh;
     private _turnStatusMesh: BABYLON.Mesh;
     private _teamIndicatorMesh: BABYLON.Mesh;
+    private _shieldLeftMesh: BABYLON.Mesh;
     private _hpLeftMesh: BABYLON.Mesh;
     private _hpLostMesh: BABYLON.Mesh;
     private _selectionMesh: BABYLON.Mesh;
@@ -114,16 +115,18 @@ class AlphaFighter extends Fighter {
             this._hpLostMesh.parent = this.transformMesh;
             this._hpLostMesh.material = Main.redMaterial;
         }
+        if (!this._shieldLeftMesh) {
+            this._shieldLeftMesh = new BABYLON.Mesh("shield-left-" + this.id);
+            this._shieldLeftMesh.parent = this.transformMesh;
+            this._shieldLeftMesh.position.y = -0.001;
+            this._shieldLeftMesh.material = Main.cyanMaterial;
+        }
         if (!this._selectionMesh) {
             this._selectionMesh = new BABYLON.Mesh("selection-" + this.id);
             this._selectionMesh.parent = this.transformMesh;
-            SpaceMeshBuilder.CreateHexagonVertexData(0.15, 0.27).applyToMesh(this._selectionMesh);
-            if (this.team === 0) {
-                this._selectionMesh.material = Main.blueMaterial;
-            }
-            else if (this.team === 1) {
-                this._selectionMesh.material = Main.redMaterial;
-            }
+            this._selectionMesh.position.y = -0.001;
+            SpaceMeshBuilder.CreateHexagonVertexData(0.33, 0.43).applyToMesh(this._selectionMesh);
+            this._selectionMesh.material = Main.whiteMaterial;
             this._selectionMesh.isVisible = false;
         }
         this.transformMesh.position.x = 0.75 * this._tile.i;
@@ -132,22 +135,38 @@ class AlphaFighter extends Fighter {
     }
 
     public updateHitPointMesh(): void {
-        let ratio = this.hp / this.stamina;
-        if (ratio <= 0) {
+        let ratioHP = this.hp / this.stamina;
+        if (ratioHP <= 0) {
             this._hpLeftMesh.isVisible = false;
             this._hpLostMesh.isVisible = true;
             SpaceMeshBuilder.CreateHPBar(0.33, 0.12, 0, 1).applyToMesh(this._hpLostMesh);
         }
-        else if (ratio >= 1) {
+        else if (ratioHP >= 1) {
             this._hpLeftMesh.isVisible = true;
             SpaceMeshBuilder.CreateHPBar(0.33, 0.12, 0, 1).applyToMesh(this._hpLeftMesh);
             this._hpLostMesh.isVisible = false;
         }
         else {
             this._hpLeftMesh.isVisible = true;
-            SpaceMeshBuilder.CreateHPBar(0.33, 0.12, 0, ratio).applyToMesh(this._hpLeftMesh);
+            SpaceMeshBuilder.CreateHPBar(0.33, 0.12, 0, ratioHP).applyToMesh(this._hpLeftMesh);
             this._hpLostMesh.isVisible = true;
-            SpaceMeshBuilder.CreateHPBar(0.33, 0.12, ratio, 1).applyToMesh(this._hpLostMesh);
+            SpaceMeshBuilder.CreateHPBar(0.33, 0.12, ratioHP, 1).applyToMesh(this._hpLostMesh);
+        }
+
+        let ratioShield = 0;
+        if (this.shieldCapacity > 0) {
+            ratioShield = this.shield / this.shieldCapacity;
+        }
+        if (ratioShield <= 0) {
+            this._shieldLeftMesh.isVisible = false;
+        }
+        else if (ratioShield >= 1) {
+            this._shieldLeftMesh.isVisible = true;
+            SpaceMeshBuilder.CreateHPBar(0.33, 0.18, 0, 1).applyToMesh(this._shieldLeftMesh);
+        }
+        else {
+            this._shieldLeftMesh.isVisible = true;
+            SpaceMeshBuilder.CreateHPBar(0.33, 0.18, 0, ratioShield).applyToMesh(this._shieldLeftMesh);
         }
     }
 
