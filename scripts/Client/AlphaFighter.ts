@@ -134,6 +134,12 @@ class AlphaFighter extends Fighter {
         this.updateHitPointMesh();
     }
 
+    public rotateHPShieldMesh(r: number): void {
+        this._hpLeftMesh.rotation.y = r;
+        this._hpLostMesh.rotation.y = r;
+        this._shieldLeftMesh.rotation.y = r;
+    }
+
     public updateHitPointMesh(): void {
         let ratioHP = this.hp / this.stamina;
         if (ratioHP <= 0) {

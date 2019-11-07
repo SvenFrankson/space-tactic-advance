@@ -365,6 +365,40 @@ class AlphaBoard extends Board {
         }, scene);
     }
 }
+class AlphaCamera extends BABYLON.ArcRotateCamera {
+    constructor() {
+        super("alpha-camera", 0, 0, 1, new BABYLON.Vector3(0, 0, 0), Main.Scene);
+        this._currentTargetPos = BABYLON.Vector3.Zero();
+        this._update = () => {
+            if (this.currentTarget instanceof BABYLON.Vector3) {
+                this._currentTargetPos.copyFrom(this.currentTarget);
+            }
+            else if (this.currentTarget instanceof BABYLON.AbstractMesh) {
+                this._currentTargetPos.copyFrom(this.currentTarget.position);
+            }
+            else {
+                return;
+            }
+            BABYLON.Vector3.LerpToRef(this.target, this._currentTargetPos, 0.05, this.target);
+            let dir = 3 * Math.PI / 2 - this.alpha;
+            dir = Math.round(dir / (Math.PI / 3));
+            if (dir !== this._lastDir) {
+                this._lastDir = dir;
+                let r = dir * Math.PI / 3;
+                AlphaClient.Instance.forEachFighter((f) => {
+                    f.rotateHPShieldMesh(r);
+                });
+            }
+        };
+        this.setPosition(new BABYLON.Vector3(-0, 5, -10));
+        this.attachControl(Main.Canvas, true);
+        this.lowerRadiusLimit = 6;
+        this.upperRadiusLimit = 200;
+        this.wheelPrecision *= 4;
+        Main.Camera = this;
+        Main.Scene.onBeforeRenderObservable.add(this._update);
+    }
+}
 class Client {
     constructor(_team) {
         this._team = _team;
@@ -537,6 +571,14 @@ class AlphaClient extends Client {
             }
         }
     }
+    forEachFighter(callback) {
+        for (let i = 0; i < this._fighters.length; i++) {
+            let fighter = this._fighters[i];
+            if (fighter instanceof AlphaFighter) {
+                callback(fighter);
+            }
+        }
+    }
     onBoardInitialized() {
         this.alphaBoard.updateMesh(Main.Scene);
     }
@@ -595,6 +637,7 @@ class AlphaClient extends Client {
     onPhaseInitialized() {
         let activeFighter = this.getActiveFighter();
         if (activeFighter) {
+            Main.Camera.currentTarget = activeFighter.transformMesh;
             if (activeFighter.team === this._team) {
                 activeFighter.showUI();
             }
@@ -1118,6 +1161,11 @@ class AlphaFighter extends Fighter {
         this.transformMesh.position.z = (this._tile.i * 0.5 + this._tile.j) * COS30;
         this.updateHitPointMesh();
     }
+    rotateHPShieldMesh(r) {
+        this._hpLeftMesh.rotation.y = r;
+        this._hpLostMesh.rotation.y = r;
+        this._shieldLeftMesh.rotation.y = r;
+    }
     updateHitPointMesh() {
         let ratioHP = this.hp / this.stamina;
         if (ratioHP <= 0) {
@@ -1428,13 +1476,7 @@ class Main {
         Main.Engine = new BABYLON.Engine(Main.Canvas, true, { preserveDrawingBuffer: true, stencil: true });
     }
     initializeCamera() {
-        let camera = new BABYLON.ArcRotateCamera("camera1", 0, 0, 1, new BABYLON.Vector3(0, 0, 0), Main.Scene);
-        camera.setPosition(new BABYLON.Vector3(-10, 25, 30));
-        camera.attachControl(Main.Canvas, true);
-        camera.lowerRadiusLimit = 6;
-        camera.upperRadiusLimit = 200;
-        camera.wheelPrecision *= 4;
-        Main.Camera = camera;
+        Main.Camera = new AlphaCamera();
     }
     async initialize() {
         await this.initializeScene();

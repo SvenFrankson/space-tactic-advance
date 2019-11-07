@@ -8,7 +8,7 @@ class Main {
     public static Engine: BABYLON.Engine;
     public static Scene: BABYLON.Scene;
 	public static Light: BABYLON.Light;
-	public static Camera: BABYLON.Camera;
+	public static Camera: AlphaCamera;
 	public static Skybox: BABYLON.Mesh;
 
     private static _cellShadingMaterial: ToonMaterial;
@@ -41,13 +41,7 @@ class Main {
 	}
 
 	public initializeCamera(): void {
-        let camera = new BABYLON.ArcRotateCamera("camera1", 0, 0, 1, new BABYLON.Vector3(0, 0, 0), Main.Scene);
-        camera.setPosition(new BABYLON.Vector3(- 10, 25, 30));
-		camera.attachControl(Main.Canvas, true);
-		camera.lowerRadiusLimit = 6;
-		camera.upperRadiusLimit = 200;
-		camera.wheelPrecision *= 4;
-		Main.Camera = camera;
+		Main.Camera = new AlphaCamera();
 	}
 	
 	public async initialize(): Promise<void> {

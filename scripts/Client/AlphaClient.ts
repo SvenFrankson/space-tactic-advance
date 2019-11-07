@@ -29,6 +29,15 @@ class AlphaClient extends Client {
         }
     }
 
+    public forEachFighter(callback: (f: AlphaFighter) => void): void {
+        for (let i = 0; i < this._fighters.length; i++) {
+            let fighter = this._fighters[i];
+            if (fighter instanceof AlphaFighter) {
+                callback(fighter);
+            }
+        }
+    }
+
     protected onBoardInitialized(): void {
         this.alphaBoard.updateMesh(Main.Scene);
     }
@@ -100,6 +109,7 @@ class AlphaClient extends Client {
     protected onPhaseInitialized(): void {
         let activeFighter = this.getActiveFighter() as AlphaFighter;
         if (activeFighter) {
+            Main.Camera.currentTarget = activeFighter.transformMesh;
             if (activeFighter.team === this._team) {
                 activeFighter.showUI();
             }
