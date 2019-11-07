@@ -22,7 +22,7 @@ class AlphaFighterSelector {
                 if (eventData.type === BABYLON.PointerEventTypes.POINTERUP) {
                     let pickedMesh = eventData.pickInfo.pickedMesh;
                     if (pickedMesh && pickedMesh.parent) {
-                        let fighter = AlphaClient.Instance.findFighter(f => { return f.transformMesh === pickedMesh || f.transformMesh === pickedMesh.parent});
+                        let fighter = AlphaClient.Instance.findFighter(f => { return f.transformMesh === pickedMesh || f.transformMesh === pickedMesh.parent });
                         if (fighter) {
                             if (this.overloadPointerUpCallback) {
                                 this.overloadPointerUpCallback(fighter);
@@ -48,7 +48,7 @@ class AlphaFighterSelector {
                 this.selectedFighter.select();
             }
         }
-    } 
+    }
 }
 
 class AlphaFighter extends Fighter {
@@ -72,13 +72,39 @@ class AlphaFighter extends Fighter {
             this.transformMesh = new BABYLON.Mesh("fighter-" + this.id);
         }
         if (!this._fighterMesh) {
-            this._fighterMesh = BABYLON.MeshBuilder.CreateBox(
-                "fighter-mesh-" + this.id,
-                {
-                    size: 0.5
-                },
-                scene
+            let spaceship = new SpaceShip();
+            spaceship.name = "Demo";
+            spaceship.initialize({
+                type: "root",
+                name: "body-1",
+                children: [
+                    {
+                        type: "wingL",
+                        name: "wing-1",
+                        children: [
+                            {
+                                type: "weapon",
+                                name: "canon-1"
+                            }
+                        ]
+                    },
+                    {
+                        type: "wingR",
+                        name: "wing-1",
+                        children: [
+                            {
+                                type: "weapon",
+                                name: "canon-1"
+                            }
+                        ]
+                    }
+                ]
+            },
+                "#ffdddd",
+                "#ddbbbb"
             );
+            this._fighterMesh = spaceship;
+            this._fighterMesh.scaling.copyFromFloats(0.2, 0.2, 0.2);
             this._fighterMesh.parent = this.transformMesh;
             this._fighterMesh.position.y = 0.5;
         }
@@ -187,11 +213,11 @@ class AlphaFighter extends Fighter {
             this._turnStatusMesh.material = Main.yellowMaterial;
         }
     }
-    
+
     public select(): void {
         this._selectionMesh.isVisible = true;
     }
-    
+
     public unselect(): void {
         this._selectionMesh.isVisible = false;
     }

@@ -1,4 +1,5 @@
 /// <reference path="../../lib/babylon.d.ts"/>
+/// <reference path="../../lib/babylon.gui.d.ts"/>
 
 var COS30 = Math.cos(Math.PI / 6);
 
@@ -10,6 +11,8 @@ class Main {
 	public static Light: BABYLON.Light;
 	public static Camera: AlphaCamera;
 	public static Skybox: BABYLON.Mesh;
+	public static GuiTexture: BABYLON.GUI.AdvancedDynamicTexture;
+	public static Loger: ScreenLoger;
 
     private static _cellShadingMaterial: ToonMaterial;
 	public static get cellShadingMaterial(): ToonMaterial {
@@ -72,6 +75,12 @@ class Main {
 		Main.cyanMaterial = new BABYLON.StandardMaterial("cyan-material", Main.Scene);
 		Main.cyanMaterial.diffuseColor.copyFromFloats(0, 1, 1);
 		Main.cyanMaterial.specularColor.copyFromFloats(0.3, 0.3, 0.3);
+
+		Main.GuiTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("hud");
+		Main.GuiTexture.layer.layerMask = 1 | 2;
+		Main.GuiTexture.idealWidth = 1920;
+
+		Main.Loger = new ScreenLoger(Main.Scene, Main.GuiTexture);
 
 		this.initializeCamera();
 		Main.Camera.minZ = 0.2;

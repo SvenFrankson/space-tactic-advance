@@ -70,7 +70,8 @@ class VertexDataLoader {
         color3Hex: string = "" // Replace blue
     ): Promise<BABYLON.VertexData> {
         let vertexDatas = await this.getColorizedMultiple(name, baseColorHex, frameColorHex, color1Hex, color2Hex, color3Hex);
-        return vertexDatas[0];
+        console.log(vertexDatas);
+        return vertexDatas.values().next().value;
     }
 
     public async getColorizedMultiple(
