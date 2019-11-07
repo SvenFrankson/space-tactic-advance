@@ -89,12 +89,14 @@ class Client implements IClient {
         if (fighter) {
             let tile = this._board.getTileByIJ(tileI, tileJ);
             if (tile) {
+                this.onBeforeFighterMoved(fighter, tileI, tileJ);
                 tile.setFighter(fighter);
                 fighter.hasMoved = true;
                 this.onFighterMoved(fighter);
             }
         }
     }
+    protected onBeforeFighterMoved(fighter: Fighter, tileI: number, tileJ: number): void {}
     protected onFighterMoved(fighter: Fighter): void {}
 
     public attackFighter(fighterId: number, targetId: number, result: number): void {

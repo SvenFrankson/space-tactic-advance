@@ -476,12 +476,14 @@ class Client {
         if (fighter) {
             let tile = this._board.getTileByIJ(tileI, tileJ);
             if (tile) {
+                this.onBeforeFighterMoved(fighter, tileI, tileJ);
                 tile.setFighter(fighter);
                 fighter.hasMoved = true;
                 this.onFighterMoved(fighter);
             }
         }
     }
+    onBeforeFighterMoved(fighter, tileI, tileJ) { }
     onFighterMoved(fighter) { }
     attackFighter(fighterId, targetId, result) {
         let fighter = this.getFighterByID(fighterId);
@@ -645,9 +647,27 @@ class AlphaClient extends Client {
         }
     }
     ;
+    onBeforeFighterMoved(fighter, tileI, tileJ) {
+        if (fighter instanceof AlphaFighter) {
+            let x0 = fighter.transformMesh.position.x;
+            let z0 = fighter.transformMesh.position.z;
+            let x1 = 0.75 * tileI;
+            let z1 = (tileI * 0.5 + tileJ) * COS30;
+            let i = 0;
+            let moveAnimation = () => {
+                let r = Math.min(i / 60, 1);
+                i++;
+                fighter.transformMesh.position.x = x0 * (1 - r) + x1 * r;
+                fighter.transformMesh.position.z = z0 * (1 - r) + z1 * r;
+                if (r < 1) {
+                    requestAnimationFrame(moveAnimation);
+                }
+            };
+            moveAnimation();
+        }
+    }
     onFighterMoved(fighter) {
         if (fighter instanceof AlphaFighter) {
-            fighter.updateMesh(Main.Scene);
             if (fighter === this.getActiveFighter()) {
                 fighter.onAfterFighterMoved();
             }
