@@ -104,9 +104,9 @@ class AlphaFighter extends Fighter {
                 "#ddbbbb"
             );
             this._fighterMesh = spaceship;
-            this._fighterMesh.scaling.copyFromFloats(0.2, 0.2, 0.2);
+            this._fighterMesh.scaling.copyFromFloats(0.15, 0.15, 0.15);
             this._fighterMesh.parent = this.transformMesh;
-            this._fighterMesh.position.y = 0.5;
+            this._fighterMesh.position.y = 0.25;
         }
         if (!this._turnStatusMesh) {
             this._turnStatusMesh = BABYLON.MeshBuilder.CreateIcoSphere(

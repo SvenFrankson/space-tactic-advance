@@ -393,9 +393,9 @@ class AlphaCamera extends BABYLON.ArcRotateCamera {
         };
         this.setPosition(new BABYLON.Vector3(-0, 5, -10));
         this.attachControl(Main.Canvas, true);
-        this.lowerRadiusLimit = 6;
-        this.upperRadiusLimit = 200;
-        this.wheelPrecision *= 4;
+        this.lowerRadiusLimit = 1;
+        this.upperRadiusLimit = 40;
+        this.wheelPrecision *= 8;
         Main.Camera = this;
         Main.Scene.onBeforeRenderObservable.add(this._update);
     }
@@ -653,14 +653,25 @@ class AlphaClient extends Client {
             let z0 = fighter.transformMesh.position.z;
             let x1 = 0.75 * tileI;
             let z1 = (tileI * 0.5 + tileJ) * COS30;
+            let length = Math.sqrt((x1 - x0) * (x1 - x0) + (z1 - z0) * (z1 - z0));
             let i = 0;
             let moveAnimation = () => {
-                let r = Math.min(i / 60, 1);
-                i++;
-                fighter.transformMesh.position.x = x0 * (1 - r) + x1 * r;
-                fighter.transformMesh.position.z = z0 * (1 - r) + z1 * r;
-                if (r < 1) {
+                let dir = fighter.transformMesh.getDirection(BABYLON.Axis.Z);
+                let targetDir2D = new BABYLON.Vector2(x1, z1);
+                targetDir2D.x -= fighter.transformMesh.position.x;
+                targetDir2D.y -= fighter.transformMesh.position.z;
+                let dist = targetDir2D.length();
+                let a = Math2D.AngleFromTo(targetDir2D, new BABYLON.Vector2(0, 1), true);
+                if (dist > 0.01) {
+                    let dA = Math2D.StepFromToCirular(fighter.transformMesh.rotation.y, a, Math.PI / 30);
+                    fighter.transformMesh.rotation.y = dA;
+                    fighter.transformMesh.position.x += dir.x * Math.min(dist, length) / 30;
+                    fighter.transformMesh.position.z += dir.z * Math.min(dist, length) / 30;
                     requestAnimationFrame(moveAnimation);
+                }
+                else {
+                    fighter.transformMesh.position.x = x1;
+                    fighter.transformMesh.position.z = z1;
                 }
             };
             moveAnimation();
@@ -1158,9 +1169,9 @@ class AlphaFighter extends Fighter {
                 ]
             }, "#ffdddd", "#ddbbbb");
             this._fighterMesh = spaceship;
-            this._fighterMesh.scaling.copyFromFloats(0.2, 0.2, 0.2);
+            this._fighterMesh.scaling.copyFromFloats(0.15, 0.15, 0.15);
             this._fighterMesh.parent = this.transformMesh;
-            this._fighterMesh.position.y = 0.5;
+            this._fighterMesh.position.y = 0.25;
         }
         if (!this._turnStatusMesh) {
             this._turnStatusMesh = BABYLON.MeshBuilder.CreateIcoSphere("turn-status-" + this.id, {

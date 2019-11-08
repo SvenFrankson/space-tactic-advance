@@ -8,9 +8,9 @@ class AlphaCamera extends BABYLON.ArcRotateCamera {
         super("alpha-camera", 0, 0, 1, new BABYLON.Vector3(0, 0, 0), Main.Scene);
         this.setPosition(new BABYLON.Vector3(- 0, 5, -10));
 		this.attachControl(Main.Canvas, true);
-		this.lowerRadiusLimit = 6;
-		this.upperRadiusLimit = 200;
-		this.wheelPrecision *= 4;
+		this.lowerRadiusLimit = 1;
+		this.upperRadiusLimit = 40;
+		this.wheelPrecision *= 8;
         Main.Camera = this;
         
         Main.Scene.onBeforeRenderObservable.add(this._update);
