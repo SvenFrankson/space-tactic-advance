@@ -1,6 +1,7 @@
 class AlphaCamera extends BABYLON.ArcRotateCamera {
 
     public currentTarget: any;
+    public currentRadius: number = 5;
     private _currentTargetPos: BABYLON.Vector3 = BABYLON.Vector3.Zero();
     private _lastDir: number;
 
@@ -27,6 +28,7 @@ class AlphaCamera extends BABYLON.ArcRotateCamera {
             return;
         }
         BABYLON.Vector3.LerpToRef(this.target, this._currentTargetPos, 0.05, this.target);
+        this.radius = this.radius * 0.95 + this.currentRadius * 0.05;
         let dir = 3 * Math.PI / 2 - this.alpha;
         dir = Math.round(dir / (Math.PI / 3));
         if (dir !== this._lastDir) {

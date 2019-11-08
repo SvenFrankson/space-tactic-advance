@@ -56,7 +56,7 @@ class AlphaFighter extends Fighter {
     private static ActionPanel: ActionPanel;
 
     public transformMesh: BABYLON.Mesh;
-    private _fighterMesh: BABYLON.Mesh;
+    public fighterMesh: BABYLON.Mesh;
     private _turnStatusMesh: BABYLON.Mesh;
     private _teamIndicatorMesh: BABYLON.Mesh;
     private _shieldLeftMesh: BABYLON.Mesh;
@@ -71,7 +71,7 @@ class AlphaFighter extends Fighter {
         if (!this.transformMesh) {
             this.transformMesh = new BABYLON.Mesh("fighter-" + this.id);
         }
-        if (!this._fighterMesh) {
+        if (!this.fighterMesh) {
             let spaceship = new SpaceShip();
             spaceship.name = "Demo";
             spaceship.initialize({
@@ -103,10 +103,10 @@ class AlphaFighter extends Fighter {
                 "#ffdddd",
                 "#ddbbbb"
             );
-            this._fighterMesh = spaceship;
-            this._fighterMesh.scaling.copyFromFloats(0.15, 0.15, 0.15);
-            this._fighterMesh.parent = this.transformMesh;
-            this._fighterMesh.position.y = 0.25;
+            this.fighterMesh = spaceship;
+            this.fighterMesh.scaling.copyFromFloats(0.15, 0.15, 0.15);
+            this.fighterMesh.parent = this.transformMesh;
+            this.fighterMesh.position.y = 0.25;
         }
         if (!this._turnStatusMesh) {
             this._turnStatusMesh = BABYLON.MeshBuilder.CreateIcoSphere(
@@ -117,7 +117,7 @@ class AlphaFighter extends Fighter {
                 },
                 Main.Scene
             );
-            this._turnStatusMesh.parent = this._fighterMesh;
+            this._turnStatusMesh.parent = this.fighterMesh;
             this._turnStatusMesh.position.y = 1;
         }
         if (!this._teamIndicatorMesh) {

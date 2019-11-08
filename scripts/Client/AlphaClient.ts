@@ -110,6 +110,7 @@ class AlphaClient extends Client {
         let activeFighter = this.getActiveFighter() as AlphaFighter;
         if (activeFighter) {
             Main.Camera.currentTarget = activeFighter.transformMesh;
+            Main.Camera.currentRadius = 5;
             if (activeFighter.team === this._team) {
                 activeFighter.showUI();
             }
@@ -123,17 +124,17 @@ class AlphaClient extends Client {
             let x1 = 0.75 * tileI;
             let z1 = (tileI * 0.5 + tileJ) * COS30;
             let length = Math.sqrt((x1 - x0) * (x1 - x0) + (z1 - z0) * (z1 - z0));
-            let i = 0;
             let moveAnimation = () => {
-                let dir = fighter.transformMesh.getDirection(BABYLON.Axis.Z);
+                let dir = BABYLON.Vector3.TransformNormal(BABYLON.Axis.Z, fighter.fighterMesh.getWorldMatrix());
+                dir.normalize();
                 let targetDir2D = new BABYLON.Vector2(x1, z1);
                 targetDir2D.x -= fighter.transformMesh.position.x;
                 targetDir2D.y -= fighter.transformMesh.position.z;
                 let dist = targetDir2D.length();
                 let a = Math2D.AngleFromTo(targetDir2D, new BABYLON.Vector2(0, 1), true);
                 if (dist > 0.01) {
-                    let dA = Math2D.StepFromToCirular(fighter.transformMesh.rotation.y, a, Math.PI / 30);
-                    fighter.transformMesh.rotation.y = dA;
+                    let dA = Math2D.StepFromToCirular(fighter.fighterMesh.rotation.y, a, Math.PI / 40);
+                    fighter.fighterMesh.rotation.y = dA;
                     fighter.transformMesh.position.x += dir.x * Math.min(dist, length) / 30;
                     fighter.transformMesh.position.z += dir.z * Math.min(dist, length) / 30;
                     requestAnimationFrame(moveAnimation);

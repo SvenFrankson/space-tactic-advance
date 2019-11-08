@@ -369,6 +369,7 @@ class AlphaBoard extends Board {
 class AlphaCamera extends BABYLON.ArcRotateCamera {
     constructor() {
         super("alpha-camera", 0, 0, 1, new BABYLON.Vector3(0, 0, 0), Main.Scene);
+        this.currentRadius = 5;
         this._currentTargetPos = BABYLON.Vector3.Zero();
         this._update = () => {
             if (this.currentTarget instanceof BABYLON.Vector3) {
@@ -381,6 +382,7 @@ class AlphaCamera extends BABYLON.ArcRotateCamera {
                 return;
             }
             BABYLON.Vector3.LerpToRef(this.target, this._currentTargetPos, 0.05, this.target);
+            this.radius = this.radius * 0.95 + this.currentRadius * 0.05;
             let dir = 3 * Math.PI / 2 - this.alpha;
             dir = Math.round(dir / (Math.PI / 3));
             if (dir !== this._lastDir) {
@@ -641,6 +643,7 @@ class AlphaClient extends Client {
         let activeFighter = this.getActiveFighter();
         if (activeFighter) {
             Main.Camera.currentTarget = activeFighter.transformMesh;
+            Main.Camera.currentRadius = 5;
             if (activeFighter.team === this._team) {
                 activeFighter.showUI();
             }
@@ -654,17 +657,17 @@ class AlphaClient extends Client {
             let x1 = 0.75 * tileI;
             let z1 = (tileI * 0.5 + tileJ) * COS30;
             let length = Math.sqrt((x1 - x0) * (x1 - x0) + (z1 - z0) * (z1 - z0));
-            let i = 0;
             let moveAnimation = () => {
-                let dir = fighter.transformMesh.getDirection(BABYLON.Axis.Z);
+                let dir = BABYLON.Vector3.TransformNormal(BABYLON.Axis.Z, fighter.fighterMesh.getWorldMatrix());
+                dir.normalize();
                 let targetDir2D = new BABYLON.Vector2(x1, z1);
                 targetDir2D.x -= fighter.transformMesh.position.x;
                 targetDir2D.y -= fighter.transformMesh.position.z;
                 let dist = targetDir2D.length();
                 let a = Math2D.AngleFromTo(targetDir2D, new BABYLON.Vector2(0, 1), true);
                 if (dist > 0.01) {
-                    let dA = Math2D.StepFromToCirular(fighter.transformMesh.rotation.y, a, Math.PI / 30);
-                    fighter.transformMesh.rotation.y = dA;
+                    let dA = Math2D.StepFromToCirular(fighter.fighterMesh.rotation.y, a, Math.PI / 40);
+                    fighter.fighterMesh.rotation.y = dA;
                     fighter.transformMesh.position.x += dir.x * Math.min(dist, length) / 30;
                     fighter.transformMesh.position.z += dir.z * Math.min(dist, length) / 30;
                     requestAnimationFrame(moveAnimation);
@@ -1139,7 +1142,7 @@ class AlphaFighter extends Fighter {
         if (!this.transformMesh) {
             this.transformMesh = new BABYLON.Mesh("fighter-" + this.id);
         }
-        if (!this._fighterMesh) {
+        if (!this.fighterMesh) {
             let spaceship = new SpaceShip();
             spaceship.name = "Demo";
             spaceship.initialize({
@@ -1168,17 +1171,17 @@ class AlphaFighter extends Fighter {
                     }
                 ]
             }, "#ffdddd", "#ddbbbb");
-            this._fighterMesh = spaceship;
-            this._fighterMesh.scaling.copyFromFloats(0.15, 0.15, 0.15);
-            this._fighterMesh.parent = this.transformMesh;
-            this._fighterMesh.position.y = 0.25;
+            this.fighterMesh = spaceship;
+            this.fighterMesh.scaling.copyFromFloats(0.15, 0.15, 0.15);
+            this.fighterMesh.parent = this.transformMesh;
+            this.fighterMesh.position.y = 0.25;
         }
         if (!this._turnStatusMesh) {
             this._turnStatusMesh = BABYLON.MeshBuilder.CreateIcoSphere("turn-status-" + this.id, {
                 radius: 0.2,
                 subdivisions: 2
             }, Main.Scene);
-            this._turnStatusMesh.parent = this._fighterMesh;
+            this._turnStatusMesh.parent = this.fighterMesh;
             this._turnStatusMesh.position.y = 1;
         }
         if (!this._teamIndicatorMesh) {
@@ -2265,7 +2268,6 @@ RepairDrone.WingRUnFoldRotation = new BABYLON.Vector3(0, 0, 0);
 class SpaceShip extends BABYLON.Mesh {
     constructor(data, scene) {
         super("spaceship", scene);
-        this._dt = 0;
         this._colliders = [];
         this.trailMeshes = [];
         this.canons = [];
@@ -2283,10 +2285,6 @@ class SpaceShip extends BABYLON.Mesh {
         this._localY = new BABYLON.Vector3(0, 1, 0);
         this._localZ = new BABYLON.Vector3(0, 0, 1);
         this.rotation.copyFromFloats(0, 0, 0);
-        this.rotationQuaternion = BABYLON.Quaternion.Identity();
-        this._rX = BABYLON.Quaternion.Identity();
-        this._rY = BABYLON.Quaternion.Identity();
-        this._rZ = BABYLON.Quaternion.Identity();
         this.shield = new Shield(this);
         this.shield.initialize();
         this.shield.parent = this;
@@ -2933,16 +2931,18 @@ class Main {
         noPostProcessCamera.parent = Main.Camera;
         noPostProcessCamera.layerMask = 0x10000000;
         Main.Scene.activeCameras.push(Main.Camera, noPostProcessCamera);
-        // Skybox seed : 1vt3h8rxhb28
-        Main.Skybox = BABYLON.MeshBuilder.CreateSphere("skyBox", { diameter: 3000.0 }, Main.Scene);
-        Main.Skybox.layerMask = 1;
-        Main.Skybox.infiniteDistance = true;
+        let skybox = BABYLON.MeshBuilder.CreateBox("skyBox", { size: 2000.0 }, Main.Scene);
+        skybox.layerMask = 1;
+        skybox.rotation.y = Math.PI / 2;
+        skybox.infiniteDistance = true;
         let skyboxMaterial = new BABYLON.StandardMaterial("skyBox", Main.Scene);
         skyboxMaterial.backFaceCulling = false;
-        skyboxMaterial.emissiveTexture = new BABYLON.Texture("./datas/textures/sky.png", Main.Scene);
+        let skyboxTexture = new BABYLON.CubeTexture("./datas/skyboxes/green-nebulae", Main.Scene, ["-px.png", "-py.png", "-pz.png", "-nx.png", "-ny.png", "-nz.png"]);
+        skyboxMaterial.reflectionTexture = skyboxTexture;
+        skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
         skyboxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
         skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
-        Main.Skybox.material = skyboxMaterial;
+        skybox.material = skyboxMaterial;
         new VertexDataLoader(Main.Scene);
         let game = new Game();
         let player0 = new AlphaClient(0);

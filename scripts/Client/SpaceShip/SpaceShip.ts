@@ -1,10 +1,6 @@
 class SpaceShip extends BABYLON.Mesh {
 
 	public mesh: BABYLON.Mesh;
-	private _dt: number = 0;
-	private _rX: BABYLON.Quaternion;
-	private _rY: BABYLON.Quaternion;
-	private _rZ: BABYLON.Quaternion;
 	private _localX: BABYLON.Vector3;
 	public get localX(): BABYLON.Vector3 {
 		return this._localX;
@@ -42,10 +38,6 @@ class SpaceShip extends BABYLON.Mesh {
 		this._localY = new BABYLON.Vector3(0, 1, 0);
 		this._localZ = new BABYLON.Vector3(0, 0, 1);
 		this.rotation.copyFromFloats(0, 0, 0);
-		this.rotationQuaternion = BABYLON.Quaternion.Identity();
-		this._rX = BABYLON.Quaternion.Identity();
-		this._rY = BABYLON.Quaternion.Identity();
-		this._rZ = BABYLON.Quaternion.Identity();
 
 		this.shield = new Shield(this);
 		this.shield.initialize();
