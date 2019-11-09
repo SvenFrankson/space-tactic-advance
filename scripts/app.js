@@ -364,6 +364,7 @@ class AlphaBoard extends Board {
         this._boardMesh = BABYLON.MeshBuilder.CreateLineSystem("board", {
             lines: lines
         }, scene);
+        this._boardMesh.isPickable = false;
     }
 }
 class AlphaCamera extends BABYLON.ArcRotateCamera {
@@ -645,6 +646,7 @@ class AlphaClient extends Client {
             Main.Camera.currentTarget = activeFighter.transformMesh;
             Main.Camera.currentRadius = 5;
             if (activeFighter.team === this._team) {
+                activeFighter.showText(PilotSpeech.GetText(PilotNature.Professional, SpeechSituation.Ready));
                 activeFighter.showUI();
             }
         }
@@ -652,6 +654,7 @@ class AlphaClient extends Client {
     ;
     onBeforeFighterMoved(fighter, tileI, tileJ) {
         if (fighter instanceof AlphaFighter) {
+            fighter.showText(PilotSpeech.GetText(PilotNature.Professional, SpeechSituation.Move));
             let x0 = fighter.transformMesh.position.x;
             let z0 = fighter.transformMesh.position.z;
             let x1 = 0.75 * tileI;
@@ -689,6 +692,18 @@ class AlphaClient extends Client {
     }
     onFighterHasAttacked(fighter, target, result) {
         if (fighter instanceof AlphaFighter) {
+            fighter.showText(PilotSpeech.GetText(PilotNature.Professional, SpeechSituation.Attack));
+            setTimeout(() => {
+                if (result === 0) {
+                    fighter.showText(PilotSpeech.GetText(PilotNature.Professional, SpeechSituation.AttackMiss));
+                }
+                if (result === 1) {
+                    fighter.showText(PilotSpeech.GetText(PilotNature.Professional, SpeechSituation.AttackSuccess));
+                }
+                if (result === 2) {
+                    fighter.showText(PilotSpeech.GetText(PilotNature.Professional, SpeechSituation.AttackCritical));
+                }
+            }, 3000);
             fighter.updateMesh(Main.Scene);
             if (fighter === this.getActiveFighter()) {
                 fighter.onAfterFighterAttacked();
@@ -705,11 +720,17 @@ class AlphaClient extends Client {
     ;
     onFighterPhaseDelayed(fighter) {
         if (fighter instanceof AlphaFighter) {
+            if (fighter.team === this._team) {
+                fighter.showText(PilotSpeech.GetText(PilotNature.Professional, SpeechSituation.Hold));
+            }
             fighter.hideReachableTiles();
         }
     }
     onFighterPhaseEnded(fighter) {
         if (fighter instanceof AlphaFighter) {
+            if (fighter.team === this._team) {
+                fighter.showText(PilotSpeech.GetText(PilotNature.Professional, SpeechSituation.Pass));
+            }
             fighter.hideUI();
             fighter.hideReachableTiles();
         }
@@ -1098,9 +1119,12 @@ class AlphaFighterSelector {
         this.overloadPointerUpCallback = undefined;
         AlphaFighterSelector._Instance = this;
         Main.Scene.onPointerObservable.add((eventData) => {
+            console.log("A");
             if (eventData.type === BABYLON.PointerEventTypes.POINTERUP) {
                 let pickedMesh = eventData.pickInfo.pickedMesh;
+                console.log(pickedMesh);
                 if (pickedMesh && pickedMesh.parent) {
+                    console.log(pickedMesh);
                     let fighter = AlphaClient.Instance.findFighter(f => { return f.transformMesh === pickedMesh || f.transformMesh === pickedMesh.parent; });
                     if (fighter) {
                         if (this.overloadPointerUpCallback) {
@@ -1134,9 +1158,11 @@ class AlphaFighterSelector {
     }
 }
 class AlphaFighter extends Fighter {
-    constructor() {
-        super(...arguments);
+    constructor(team) {
+        super(team);
         this._reacheableTilesMeshes = [];
+        this.clearSpeechBubbleTimeout = -1;
+        PilotSpeech.LoadProfessionalSpeeches();
     }
     updateMesh(scene) {
         if (!this.transformMesh) {
@@ -1185,15 +1211,15 @@ class AlphaFighter extends Fighter {
             this._turnStatusMesh.position.y = 1;
         }
         if (!this._teamIndicatorMesh) {
-            this._teamIndicatorMesh = new BABYLON.Mesh("team-indicator-" + this.id);
+            this._teamIndicatorMesh = BABYLON.MeshBuilder.CreateGround("team-indicator-" + this.id, { width: 0.7, height: 0.7 }, Main.Scene);
             this._teamIndicatorMesh.parent = this.transformMesh;
-            SpaceMeshBuilder.CreateHexagonVertexData(0.35, 0.41).applyToMesh(this._teamIndicatorMesh);
-            if (this.team === 0) {
-                this._teamIndicatorMesh.material = Main.blueMaterial;
-            }
-            else if (this.team === 1) {
-                this._teamIndicatorMesh.material = Main.redMaterial;
-            }
+            let material = new BABYLON.StandardMaterial("base-material", Main.Scene);
+            material.diffuseTexture = new BABYLON.Texture("./datas/textures/base-blue.png", Main.Scene);
+            material.diffuseTexture.hasAlpha = true;
+            material.useAlphaFromDiffuseTexture = true;
+            material.emissiveColor.copyFromFloats(1, 1, 1);
+            material.specularColor.copyFromFloats(0, 0, 0);
+            this._teamIndicatorMesh.material = material;
         }
         if (!this._hpLeftMesh) {
             this._hpLeftMesh = new BABYLON.Mesh("hp-left-" + this.id);
@@ -1208,7 +1234,6 @@ class AlphaFighter extends Fighter {
         if (!this._shieldLeftMesh) {
             this._shieldLeftMesh = new BABYLON.Mesh("shield-left-" + this.id);
             this._shieldLeftMesh.parent = this.transformMesh;
-            this._shieldLeftMesh.position.y = -0.001;
             this._shieldLeftMesh.material = Main.cyanMaterial;
         }
         if (!this._selectionMesh) {
@@ -1233,18 +1258,18 @@ class AlphaFighter extends Fighter {
         if (ratioHP <= 0) {
             this._hpLeftMesh.isVisible = false;
             this._hpLostMesh.isVisible = true;
-            SpaceMeshBuilder.CreateHPBar(0.33, 0.12, 0, 1).applyToMesh(this._hpLostMesh);
+            SpaceMeshBuilder.CreateHPVertexData(0, 1).applyToMesh(this._hpLostMesh);
         }
         else if (ratioHP >= 1) {
             this._hpLeftMesh.isVisible = true;
-            SpaceMeshBuilder.CreateHPBar(0.33, 0.12, 0, 1).applyToMesh(this._hpLeftMesh);
+            SpaceMeshBuilder.CreateHPVertexData(0, 1).applyToMesh(this._hpLeftMesh);
             this._hpLostMesh.isVisible = false;
         }
         else {
             this._hpLeftMesh.isVisible = true;
-            SpaceMeshBuilder.CreateHPBar(0.33, 0.12, 0, ratioHP).applyToMesh(this._hpLeftMesh);
+            SpaceMeshBuilder.CreateHPVertexData(0, ratioHP).applyToMesh(this._hpLeftMesh);
             this._hpLostMesh.isVisible = true;
-            SpaceMeshBuilder.CreateHPBar(0.33, 0.12, ratioHP, 1).applyToMesh(this._hpLostMesh);
+            SpaceMeshBuilder.CreateHPVertexData(ratioHP, 1).applyToMesh(this._hpLostMesh);
         }
         let ratioShield = 0;
         if (this.shieldCapacity > 0) {
@@ -1255,10 +1280,12 @@ class AlphaFighter extends Fighter {
         }
         else if (ratioShield >= 1) {
             this._shieldLeftMesh.isVisible = true;
+            this._shieldLeftMesh.isVisible = false;
             SpaceMeshBuilder.CreateHPBar(0.33, 0.18, 0, 1).applyToMesh(this._shieldLeftMesh);
         }
         else {
             this._shieldLeftMesh.isVisible = true;
+            this._shieldLeftMesh.isVisible = false;
             SpaceMeshBuilder.CreateHPBar(0.33, 0.18, 0, ratioShield).applyToMesh(this._shieldLeftMesh);
         }
     }
@@ -1275,6 +1302,7 @@ class AlphaFighter extends Fighter {
     }
     select() {
         this._selectionMesh.isVisible = true;
+        this.showText(PilotSpeech.GetText(PilotNature.Professional, SpeechSituation.Selected));
     }
     unselect() {
         this._selectionMesh.isVisible = false;
@@ -1405,6 +1433,18 @@ class AlphaFighter extends Fighter {
             this._reacheableTilesMeshes.pop().mesh.dispose();
         }
     }
+    showText(text) {
+        clearTimeout(this.clearSpeechBubbleTimeout);
+        if (this.speechBubble) {
+            this.speechBubble.dispose();
+        }
+        this.speechBubble = SpeechBubble.CreateSpeechBubble(this.transformMesh, text);
+        this.speechBubble.setTarget(this.transformMesh);
+        this.clearSpeechBubbleTimeout = setTimeout(() => {
+            this.speechBubble.dispose();
+            this.speechBubble = undefined;
+        }, 3000);
+    }
 }
 class SpaceMath {
     static ProjectPerpendicularAt(v, at) {
@@ -1503,6 +1543,36 @@ class SpaceMeshBuilder {
         normals.push(0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0);
         indices.push(0, 1, 2);
         indices.push(0, 2, 3);
+        data.positions = positions;
+        data.indices = indices;
+        data.normals = normals;
+        return data;
+    }
+    static CreateHPVertexData(min, max) {
+        let data = new BABYLON.VertexData();
+        let positions = [];
+        let indices = [];
+        let normals = [];
+        let a0 = 10 * Math.PI / 12;
+        let a1 = 3 * Math.PI / 2;
+        let aMin = a0 * (1 - min) + a1 * min;
+        let aMax = a0 * (1 - max) + a1 * max;
+        let r0 = 0.285;
+        let r1 = 0.22;
+        let rMin = r0 * (1 - min) + r1 * min;
+        let rMax = r0 * (1 - max) + r1 * max;
+        for (let i = 0; i <= 12; i++) {
+            let f = i / 12;
+            let a = aMin * (1 - f) + aMax * f;
+            let r = rMin * (1 - f) + rMax * f;
+            let p = new BABYLON.Vector3(Math.cos(a), 0.05, Math.sin(a));
+            positions.push(p.x * r, -0.001, p.z * r, p.x * 0.335, -0.001, p.z * 0.335);
+            normals.push(0, 1, 0, 0, 1, 0);
+        }
+        for (let i = 0; i < 12; i++) {
+            indices.push(2 * i, 2 * i + 1, 2 * (i + 1) + 1);
+            indices.push(2 * i, 2 * (i + 1) + 1, 2 * (i + 1));
+        }
         data.positions = positions;
         data.indices = indices;
         data.normals = normals;
@@ -1700,6 +1770,61 @@ class FlashParticle extends BABYLON.Mesh {
         this.getScene().onBeforeRenderObservable.add(this._update);
     }
 }
+class SpeechBubble extends HTMLElement {
+    constructor() {
+        super();
+        this._initialized = false;
+        this._update = () => {
+            if (!this._target) {
+                return;
+            }
+            let dView = this._target.position.subtract(Main.Camera.position);
+            let n = BABYLON.Vector3.Cross(dView, new BABYLON.Vector3(0, 1, 0));
+            n.normalize();
+            n.scaleInPlace(0.2);
+            let p = this._target.position.add(n);
+            p.y += 0.4;
+            let screenPos = BABYLON.Vector3.Project(p, BABYLON.Matrix.Identity(), this._target.getScene().getTransformMatrix(), Main.Camera.viewport.toGlobal(1, 1));
+            this.style.right = ((1 - screenPos.x) * Main.Canvas.width) + "px";
+            this.style.bottom = ((1 - screenPos.y) * Main.Canvas.height) + "px";
+        };
+    }
+    static CreateSpeechBubble(target, text) {
+        let bubble = document.createElement("speech-bubble");
+        document.body.appendChild(bubble);
+        bubble.textContent = text.toLocaleUpperCase();
+        return bubble;
+    }
+    connectedCallback() {
+        if (this._initialized) {
+            return;
+        }
+        this._initialized = true;
+    }
+    dispose() {
+        if (this._target) {
+            this._target.getScene().onBeforeRenderObservable.removeCallback(this._update);
+        }
+        document.body.removeChild(this);
+    }
+    setTarget(mesh) {
+        this.style.position = "fixed";
+        this._target = mesh;
+        this._target.getScene().onBeforeRenderObservable.add(this._update);
+    }
+    addButton(value, onClickCallback) {
+        let inputElement = document.createElement("input");
+        inputElement.classList.add("action-button");
+        inputElement.setAttribute("type", "button");
+        inputElement.value = value;
+        if (onClickCallback) {
+            inputElement.onclick = onClickCallback;
+        }
+        this.appendChild(inputElement);
+        return inputElement;
+    }
+}
+window.customElements.define("speech-bubble", SpeechBubble);
 class MeshLoader {
     constructor(scene) {
         this.scene = scene;
@@ -1787,6 +1912,82 @@ class SpaceshipLoader {
         });
     }
 }
+var PilotNature;
+(function (PilotNature) {
+    PilotNature[PilotNature["Professional"] = 0] = "Professional";
+    PilotNature[PilotNature["Angry"] = 1] = "Angry";
+    PilotNature[PilotNature["Calm"] = 2] = "Calm";
+    PilotNature[PilotNature["Rookie"] = 3] = "Rookie";
+})(PilotNature || (PilotNature = {}));
+var SpeechSituation;
+(function (SpeechSituation) {
+    SpeechSituation[SpeechSituation["Ready"] = 0] = "Ready";
+    SpeechSituation[SpeechSituation["Selected"] = 1] = "Selected";
+    SpeechSituation[SpeechSituation["Move"] = 2] = "Move";
+    SpeechSituation[SpeechSituation["Attack"] = 3] = "Attack";
+    SpeechSituation[SpeechSituation["AttackSuccess"] = 4] = "AttackSuccess";
+    SpeechSituation[SpeechSituation["AttackMiss"] = 5] = "AttackMiss";
+    SpeechSituation[SpeechSituation["AttackCritical"] = 6] = "AttackCritical";
+    SpeechSituation[SpeechSituation["AttackKill"] = 7] = "AttackKill";
+    SpeechSituation[SpeechSituation["WoundLight"] = 8] = "WoundLight";
+    SpeechSituation[SpeechSituation["WoundMedium"] = 9] = "WoundMedium";
+    SpeechSituation[SpeechSituation["WoundHeavy"] = 10] = "WoundHeavy";
+    SpeechSituation[SpeechSituation["Hold"] = 11] = "Hold";
+    SpeechSituation[SpeechSituation["Pass"] = 12] = "Pass";
+})(SpeechSituation || (SpeechSituation = {}));
+class PilotSpeech {
+    static GetText(nature, situation) {
+        let speeches = PilotSpeech._Texts.get(nature).get(situation);
+        return speeches[Math.floor(Math.random() * speeches.length)];
+    }
+    static LoadProfessionalSpeeches() {
+        if (PilotSpeech._Texts.get(PilotNature.Professional)) {
+            return;
+        }
+        let speeches = new Map();
+        PilotSpeech._Texts.set(PilotNature.Professional, speeches);
+        speeches.set(SpeechSituation.Ready, [
+            "Ready.",
+            "Waiting for order."
+        ]);
+        speeches.set(SpeechSituation.Selected, [
+            "Situation : Ok.",
+            "Status : Ready."
+        ]);
+        speeches.set(SpeechSituation.Move, [
+            "Copy that.",
+            "Here I go."
+        ]);
+        speeches.set(SpeechSituation.Attack, [
+            "Target acquired.",
+            "Aiming at target.",
+            "Threat is in line of sight."
+        ]);
+        speeches.set(SpeechSituation.AttackSuccess, [
+            "Target hit. Pending damage evaluation...",
+            "Target hit. Asserting damages..."
+        ]);
+        speeches.set(SpeechSituation.AttackMiss, [
+            "Target missed. I repeat : Target missed.",
+            "Negative. Threat is still operational."
+        ]);
+        speeches.set(SpeechSituation.AttackCritical, [
+            "Target hit for substantial damages."
+        ]);
+        speeches.set(SpeechSituation.AttackKill, [
+            "Target neutralized.",
+            "Threat status : Eradicated."
+        ]);
+        speeches.set(SpeechSituation.Hold, [
+            "Holding position, over.",
+            "Stand by."
+        ]);
+        speeches.set(SpeechSituation.Pass, [
+            "Over."
+        ]);
+    }
+}
+PilotSpeech._Texts = new Map();
 class Projectile extends BABYLON.Mesh {
     constructor(direction, shooter) {
         super("projectile", shooter.getScene());
@@ -2285,9 +2486,9 @@ class SpaceShip extends BABYLON.Mesh {
         this._localY = new BABYLON.Vector3(0, 1, 0);
         this._localZ = new BABYLON.Vector3(0, 0, 1);
         this.rotation.copyFromFloats(0, 0, 0);
-        this.shield = new Shield(this);
-        this.shield.initialize();
-        this.shield.parent = this;
+        //this.shield = new Shield(this);
+        //this.shield.initialize();
+        //this.shield.parent = this;
         this.impactParticle = new BABYLON.ParticleSystem("particles", 2000, scene);
         this.impactParticle.particleTexture = new BABYLON.Texture("./datas/textures/impact.png", scene);
         this.impactParticle.emitter = this.position;
@@ -2346,7 +2547,7 @@ class SpaceShip extends BABYLON.Mesh {
         this.mesh.parent = this;
         this.wingTipLeft.parent = this.mesh;
         this.wingTipRight.parent = this.mesh;
-        this.shield.parent = this.mesh;
+        //this.shield.parent = this.mesh;
         return this.mesh;
     }
     static async _InitializeRecursively(elementData, baseColor, detailColor, spaceship, meshes) {

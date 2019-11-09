@@ -41,5 +41,6 @@ class AlphaBoard extends Board {
             },
             scene
         )
+        this._boardMesh.isPickable = false;
     }
 }

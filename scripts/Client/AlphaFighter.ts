@@ -19,9 +19,12 @@ class AlphaFighterSelector {
         AlphaFighterSelector._Instance = this;
         Main.Scene.onPointerObservable.add(
             (eventData) => {
+                console.log("A");
                 if (eventData.type === BABYLON.PointerEventTypes.POINTERUP) {
                     let pickedMesh = eventData.pickInfo.pickedMesh;
+                    console.log(pickedMesh);
                     if (pickedMesh && pickedMesh.parent) {
+                        console.log(pickedMesh);
                         let fighter = AlphaClient.Instance.findFighter(f => { return f.transformMesh === pickedMesh || f.transformMesh === pickedMesh.parent });
                         if (fighter) {
                             if (this.overloadPointerUpCallback) {
@@ -64,8 +67,15 @@ class AlphaFighter extends Fighter {
     private _hpLostMesh: BABYLON.Mesh;
     private _selectionMesh: BABYLON.Mesh;
 
+    public speechBubble: SpeechBubble;
+
     private _reacheableTilesMeshes: { mesh: BABYLON.Mesh, pointerUpCallback: () => void }[] = [];
     private _pointerObserver: BABYLON.Observer<BABYLON.PointerInfo>;
+
+    constructor(team?: number) {
+        super(team);
+        PilotSpeech.LoadProfessionalSpeeches();
+    }
 
     public updateMesh(scene: BABYLON.Scene): void {
         if (!this.transformMesh) {
@@ -121,15 +131,15 @@ class AlphaFighter extends Fighter {
             this._turnStatusMesh.position.y = 1;
         }
         if (!this._teamIndicatorMesh) {
-            this._teamIndicatorMesh = new BABYLON.Mesh("team-indicator-" + this.id);
+            this._teamIndicatorMesh = BABYLON.MeshBuilder.CreateGround("team-indicator-" + this.id, { width: 0.7, height: 0.7 }, Main.Scene);
             this._teamIndicatorMesh.parent = this.transformMesh;
-            SpaceMeshBuilder.CreateHexagonVertexData(0.35, 0.41).applyToMesh(this._teamIndicatorMesh);
-            if (this.team === 0) {
-                this._teamIndicatorMesh.material = Main.blueMaterial;
-            }
-            else if (this.team === 1) {
-                this._teamIndicatorMesh.material = Main.redMaterial;
-            }
+            let material = new BABYLON.StandardMaterial("base-material", Main.Scene);
+            material.diffuseTexture = new BABYLON.Texture("./datas/textures/base-blue.png", Main.Scene);
+            material.diffuseTexture.hasAlpha = true;
+            material.useAlphaFromDiffuseTexture = true;
+            material.emissiveColor.copyFromFloats(1, 1, 1);
+            material.specularColor.copyFromFloats(0, 0, 0);
+            this._teamIndicatorMesh.material = material;
         }
         if (!this._hpLeftMesh) {
             this._hpLeftMesh = new BABYLON.Mesh("hp-left-" + this.id);
@@ -144,7 +154,6 @@ class AlphaFighter extends Fighter {
         if (!this._shieldLeftMesh) {
             this._shieldLeftMesh = new BABYLON.Mesh("shield-left-" + this.id);
             this._shieldLeftMesh.parent = this.transformMesh;
-            this._shieldLeftMesh.position.y = -0.001;
             this._shieldLeftMesh.material = Main.cyanMaterial;
         }
         if (!this._selectionMesh) {
@@ -171,18 +180,18 @@ class AlphaFighter extends Fighter {
         if (ratioHP <= 0) {
             this._hpLeftMesh.isVisible = false;
             this._hpLostMesh.isVisible = true;
-            SpaceMeshBuilder.CreateHPBar(0.33, 0.12, 0, 1).applyToMesh(this._hpLostMesh);
+            SpaceMeshBuilder.CreateHPVertexData(0, 1).applyToMesh(this._hpLostMesh);
         }
         else if (ratioHP >= 1) {
             this._hpLeftMesh.isVisible = true;
-            SpaceMeshBuilder.CreateHPBar(0.33, 0.12, 0, 1).applyToMesh(this._hpLeftMesh);
+            SpaceMeshBuilder.CreateHPVertexData(0, 1).applyToMesh(this._hpLeftMesh);
             this._hpLostMesh.isVisible = false;
         }
         else {
             this._hpLeftMesh.isVisible = true;
-            SpaceMeshBuilder.CreateHPBar(0.33, 0.12, 0, ratioHP).applyToMesh(this._hpLeftMesh);
+            SpaceMeshBuilder.CreateHPVertexData(0, ratioHP).applyToMesh(this._hpLeftMesh);
             this._hpLostMesh.isVisible = true;
-            SpaceMeshBuilder.CreateHPBar(0.33, 0.12, ratioHP, 1).applyToMesh(this._hpLostMesh);
+            SpaceMeshBuilder.CreateHPVertexData(ratioHP, 1).applyToMesh(this._hpLostMesh);
         }
 
         let ratioShield = 0;
@@ -194,10 +203,12 @@ class AlphaFighter extends Fighter {
         }
         else if (ratioShield >= 1) {
             this._shieldLeftMesh.isVisible = true;
+            this._shieldLeftMesh.isVisible = false;
             SpaceMeshBuilder.CreateHPBar(0.33, 0.18, 0, 1).applyToMesh(this._shieldLeftMesh);
         }
         else {
             this._shieldLeftMesh.isVisible = true;
+            this._shieldLeftMesh.isVisible = false;
             SpaceMeshBuilder.CreateHPBar(0.33, 0.18, 0, ratioShield).applyToMesh(this._shieldLeftMesh);
         }
     }
@@ -216,6 +227,7 @@ class AlphaFighter extends Fighter {
 
     public select(): void {
         this._selectionMesh.isVisible = true;
+        this.showText(PilotSpeech.GetText(PilotNature.Professional, SpeechSituation.Selected));
     }
 
     public unselect(): void {
@@ -361,5 +373,24 @@ class AlphaFighter extends Fighter {
         while (this._reacheableTilesMeshes.length > 0) {
             this._reacheableTilesMeshes.pop().mesh.dispose();
         }
+    }
+
+    public clearSpeechBubbleTimeout: number = -1;
+    public showText(text: string): void {
+        clearTimeout(this.clearSpeechBubbleTimeout);
+        if (this.speechBubble) {
+            this.speechBubble.dispose();
+        }
+        this.speechBubble = SpeechBubble.CreateSpeechBubble(this.transformMesh, text);
+
+        this.speechBubble.setTarget(this.transformMesh);
+
+        this.clearSpeechBubbleTimeout = setTimeout(
+            () => {
+                this.speechBubble.dispose();
+                this.speechBubble = undefined;
+            },
+            3000
+        );
     }
 }

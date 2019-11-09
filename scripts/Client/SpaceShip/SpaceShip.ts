@@ -39,9 +39,9 @@ class SpaceShip extends BABYLON.Mesh {
 		this._localZ = new BABYLON.Vector3(0, 0, 1);
 		this.rotation.copyFromFloats(0, 0, 0);
 
-		this.shield = new Shield(this);
-		this.shield.initialize();
-		this.shield.parent = this;
+		//this.shield = new Shield(this);
+		//this.shield.initialize();
+		//this.shield.parent = this;
 		this.impactParticle = new BABYLON.ParticleSystem("particles", 2000, scene);
 		this.impactParticle.particleTexture = new BABYLON.Texture("./datas/textures/impact.png", scene);
 		this.impactParticle.emitter = this.position;
@@ -100,7 +100,7 @@ class SpaceShip extends BABYLON.Mesh {
 		this.mesh.parent = this;
 		this.wingTipLeft.parent = this.mesh;
 		this.wingTipRight.parent = this.mesh;
-		this.shield.parent = this.mesh;
+		//this.shield.parent = this.mesh;
 		return this.mesh;
 	}
 

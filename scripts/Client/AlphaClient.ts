@@ -112,6 +112,7 @@ class AlphaClient extends Client {
             Main.Camera.currentTarget = activeFighter.transformMesh;
             Main.Camera.currentRadius = 5;
             if (activeFighter.team === this._team) {
+                activeFighter.showText(PilotSpeech.GetText(PilotNature.Professional, SpeechSituation.Ready));
                 activeFighter.showUI();
             }
         }
@@ -119,6 +120,7 @@ class AlphaClient extends Client {
 
     protected onBeforeFighterMoved(fighter: Fighter, tileI: number, tileJ: number): void {
         if (fighter instanceof AlphaFighter) {
+            fighter.showText(PilotSpeech.GetText(PilotNature.Professional, SpeechSituation.Move));
             let x0 = fighter.transformMesh.position.x;
             let z0 = fighter.transformMesh.position.z;
             let x1 = 0.75 * tileI;
@@ -159,6 +161,21 @@ class AlphaClient extends Client {
 
     protected onFighterHasAttacked(fighter: Fighter, target: Fighter, result: number): void {
         if (fighter instanceof AlphaFighter) {
+            fighter.showText(PilotSpeech.GetText(PilotNature.Professional, SpeechSituation.Attack));
+            setTimeout(
+                () => {
+                    if (result === 0) {
+                        fighter.showText(PilotSpeech.GetText(PilotNature.Professional, SpeechSituation.AttackMiss));
+                    }
+                    if (result === 1) {
+                        fighter.showText(PilotSpeech.GetText(PilotNature.Professional, SpeechSituation.AttackSuccess));
+                    }
+                    if (result === 2) {
+                        fighter.showText(PilotSpeech.GetText(PilotNature.Professional, SpeechSituation.AttackCritical));
+                    }
+                },
+                3000
+            )
             fighter.updateMesh(Main.Scene);
             if (fighter === this.getActiveFighter()) {
                 fighter.onAfterFighterAttacked();
@@ -176,12 +193,18 @@ class AlphaClient extends Client {
 
     protected onFighterPhaseDelayed(fighter: Fighter): void {
         if (fighter instanceof AlphaFighter) {
+            if (fighter.team === this._team) {
+                fighter.showText(PilotSpeech.GetText(PilotNature.Professional, SpeechSituation.Hold));
+            }
             fighter.hideReachableTiles();
         }
     }
     
     protected onFighterPhaseEnded(fighter: Fighter): void {
         if (fighter instanceof AlphaFighter) {
+            if (fighter.team === this._team) {
+                fighter.showText(PilotSpeech.GetText(PilotNature.Professional, SpeechSituation.Pass));
+            }
             fighter.hideUI();
             fighter.hideReachableTiles();
         }

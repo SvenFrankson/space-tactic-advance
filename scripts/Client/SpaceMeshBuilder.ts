@@ -48,6 +48,46 @@ class SpaceMeshBuilder {
         return data;
     }
 
+    public static CreateHPVertexData(min: number, max: number): BABYLON.VertexData {
+        let data = new BABYLON.VertexData();
+        let positions: number[] = [];
+        let indices: number[] = [];
+        let normals: number[] = [];
+
+        let a0 = 10 * Math.PI / 12;
+        let a1 = 3 * Math.PI / 2;
+        let aMin = a0 * (1 - min) + a1 * min;
+        let aMax = a0 * (1 - max) + a1 * max;
+        let r0 = 0.285;
+        let r1 = 0.22;
+        let rMin = r0 * (1 - min) + r1 * min;
+        let rMax = r0 * (1 - max) + r1 * max;
+
+        for (let i = 0; i <= 12; i++) {
+            let f = i / 12;
+            let a = aMin * (1 - f) + aMax * f;
+            let r = rMin * (1 - f) + rMax * f;
+            let p = new BABYLON.Vector3(
+                Math.cos(a),
+                0.05,
+                Math.sin(a)
+            );
+            positions.push(p.x * r, - 0.001, p.z * r, p.x * 0.335, - 0.001, p.z * 0.335);
+            normals.push(0, 1, 0, 0, 1, 0);
+        }
+
+        for (let i = 0; i < 12; i++) {
+            indices.push(2 * i, 2 * i + 1, 2 * (i + 1) + 1);
+            indices.push(2 * i, 2 * (i + 1) + 1, 2 * (i + 1));
+        }
+
+        data.positions = positions;
+        data.indices = indices;
+        data.normals = normals;
+
+        return data;
+    }
+
     public static CreateHexagonVertexData(rMin: number, rMax: number): BABYLON.VertexData {
         let data = new BABYLON.VertexData();
         let positions: number[] = [];

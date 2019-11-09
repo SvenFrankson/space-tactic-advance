@@ -1,0 +1,31 @@
+@font-face {
+    font-family: "KomikaHand";
+    src:    url("./fonts/KOMIKAH_.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: "KomikaJam";
+    src:    url("./fonts/KOMIKJ__.ttf") format("truetype");
+}
+
+speech-bubble {
+    position: fixed;
+    display: inline-block;
+    font-size: 14px;
+    font-family: "KomikaJam";
+    background-color: white;
+    color: black;
+    border: solid 2px black;
+    padding: 5px 10px 5px 10px;
+    max-width: 200px;
+}
+
+#bubble-speech-ruler {
+    background-color: red;
+    display: inline-block;
+    font-size: 16px;
+    font-family: Arial, Helvetica, sans-serif;
+    position: absolute;
+    white-space: nowrap;
+    z-index: 10;
+}
