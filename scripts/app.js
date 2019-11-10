@@ -1240,11 +1240,16 @@ class AlphaFighter extends Fighter {
             this._shieldLostMesh.material = Main.whiteMaterial;
         }
         if (!this._selectionMesh) {
-            this._selectionMesh = new BABYLON.Mesh("selection-" + this.id);
-            this._selectionMesh.parent = this.transformMesh;
-            this._selectionMesh.position.y = -0.001;
-            SpaceMeshBuilder.CreateHexagonVertexData(0.33, 0.43).applyToMesh(this._selectionMesh);
-            this._selectionMesh.material = Main.whiteMaterial;
+            let lines = [[], []];
+            for (let i = 0; i <= 32; i++) {
+                let p = new BABYLON.Vector3(Math.cos(i / 24 * Math.PI * 2), 0, Math.sin(i / 24 * Math.PI * 2));
+                lines[0].push(p.scale(0.37));
+                lines[1].push(p.scale(0.24).addInPlaceFromFloats(0, 0, 0.05));
+            }
+            this._selectionMesh = BABYLON.MeshBuilder.CreateLineSystem("selection-mesh-" + this.id, {
+                lines: lines
+            }, Main.Scene);
+            this._selectionMesh.parent = this._teamIndicatorMesh;
             this._selectionMesh.isVisible = false;
         }
         this.transformMesh.position.x = 0.75 * this._tile.i;
