@@ -59,13 +59,18 @@ class AlphaClient extends Client {
         let container = document.getElementById("fighters-order");
         container.innerHTML = "";
 
-        for (let i = 0; i <this._fighters.length; i++) {
+        console.log(this._fighters);
+        for (let i = 0; i < this._fighters.length; i++) {
             let fighter = this._fighters[i] as AlphaFighter;
+            console.log("I = " + i);
+            console.log(fighter);
             fighter.updateTurnStatus(-1);
         }
 
+        console.log(this._fighterOrder);
         for (let i = 0; i < this._fighterOrder.length; i++) {
             let fighterId = this._fighterOrder[i];
+            console.log("FighterId = " + fighterId);
             let fighter = this.getFighterByID(fighterId) as AlphaFighter;
             fighter.updateTurnStatus(i);
 
@@ -173,6 +178,9 @@ class AlphaClient extends Client {
                     if (result === 2) {
                         fighter.showText(PilotSpeech.GetText(PilotNature.Professional, SpeechSituation.AttackCritical));
                     }
+                    if (result === 3) {
+                        fighter.showText(PilotSpeech.GetText(PilotNature.Professional, SpeechSituation.AttackKill));
+                    }
                 },
                 3000
             )
@@ -185,7 +193,12 @@ class AlphaClient extends Client {
 
     protected onFighterHPShieldUpdated(fighter: Fighter) {
         if (fighter instanceof AlphaFighter) {
-            fighter.updateHitPointMesh();
+            if (fighter.hp <= 0) {
+                fighter.transformMesh.dispose();
+            }
+            else {
+                fighter.updateHitPointMesh();
+            }
         }
     };
 

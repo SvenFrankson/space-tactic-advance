@@ -34,9 +34,9 @@ class Fighter {
     public shieldSpeed: number = 2;
     public armor: number = 1;
     
-    public moveRange: number = 3;
+    public moveRange: number = 6;
     public attackRange: number = 3;
-    public attackPower: number = 3;
+    public attackPower: number = 50;
 
     public accuracy: number = 95;
     public staticAttack: boolean = false;
@@ -44,10 +44,12 @@ class Fighter {
     public dodgeRate: number = 10;
 
     public hp: number = 10;
-    public shield: number = 6;
+    public shield: number = 5;
 
     public hasMoved: boolean = false;
     public hasAttacked: boolean = false;
+
+    public isAlive: boolean = true;
 
     protected _tile: Tile;
     public get tileI(): number {
@@ -69,6 +71,13 @@ class Fighter {
 
     public initialize(): void {
         this.speed = Math.floor(Math.random() * 100);
+    }
+
+    public kill(): void {
+        this.isAlive = false;
+        if (this._tile) {
+            this._tile.removeFighter(this);
+        }
     }
 
     public setTile(t: Tile): void {

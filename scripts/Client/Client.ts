@@ -64,6 +64,7 @@ class Client implements IClient {
         for (let i = 0; i < fightersOrder.length; i++) {
             this._fighterOrder[i] = fightersOrder[i];
         }
+        console.log(this._fighterOrder);
         this.onFighterOrderUpdated();
     }
     protected onFighterOrderUpdated(): void {}
@@ -116,6 +117,17 @@ class Client implements IClient {
         if (fighter) {
             fighter.hp = hp;
             fighter.shield = shield;
+            if (fighter.hp <= 0) {
+                fighter.kill();
+                let fighterIndex = this._fighters.indexOf(fighter);
+                if (fighterIndex !== -1) {
+                    this._fighters.splice(fighterIndex, 1);
+                }
+                let fighterIdIndex = this._fighterOrder.indexOf(fighterId);
+                if (fighterIdIndex !== -1) {
+                    this._fighterOrder.splice(fighterIdIndex, 1);
+                }
+            }
             this.onFighterHPShieldUpdated(fighter);
         }
     }

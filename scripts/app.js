@@ -453,6 +453,7 @@ class Client {
         for (let i = 0; i < fightersOrder.length; i++) {
             this._fighterOrder[i] = fightersOrder[i];
         }
+        console.log(this._fighterOrder);
         this.onFighterOrderUpdated();
     }
     onFighterOrderUpdated() { }
@@ -503,6 +504,17 @@ class Client {
         if (fighter) {
             fighter.hp = hp;
             fighter.shield = shield;
+            if (fighter.hp <= 0) {
+                fighter.kill();
+                let fighterIndex = this._fighters.indexOf(fighter);
+                if (fighterIndex !== -1) {
+                    this._fighters.splice(fighterIndex, 1);
+                }
+                let fighterIdIndex = this._fighterOrder.indexOf(fighterId);
+                if (fighterIdIndex !== -1) {
+                    this._fighterOrder.splice(fighterIdIndex, 1);
+                }
+            }
             this.onFighterHPShieldUpdated(fighter);
         }
     }
@@ -600,12 +612,17 @@ class AlphaClient extends Client {
     onFighterOrderUpdated() {
         let container = document.getElementById("fighters-order");
         container.innerHTML = "";
+        console.log(this._fighters);
         for (let i = 0; i < this._fighters.length; i++) {
             let fighter = this._fighters[i];
+            console.log("I = " + i);
+            console.log(fighter);
             fighter.updateTurnStatus(-1);
         }
+        console.log(this._fighterOrder);
         for (let i = 0; i < this._fighterOrder.length; i++) {
             let fighterId = this._fighterOrder[i];
+            console.log("FighterId = " + fighterId);
             let fighter = this.getFighterByID(fighterId);
             fighter.updateTurnStatus(i);
             let dElement = document.createElement("div");
@@ -701,6 +718,9 @@ class AlphaClient extends Client {
                 if (result === 2) {
                     fighter.showText(PilotSpeech.GetText(PilotNature.Professional, SpeechSituation.AttackCritical));
                 }
+                if (result === 3) {
+                    fighter.showText(PilotSpeech.GetText(PilotNature.Professional, SpeechSituation.AttackKill));
+                }
             }, 3000);
             fighter.updateMesh(Main.Scene);
             if (fighter === this.getActiveFighter()) {
@@ -710,7 +730,12 @@ class AlphaClient extends Client {
     }
     onFighterHPShieldUpdated(fighter) {
         if (fighter instanceof AlphaFighter) {
-            fighter.updateHitPointMesh();
+            if (fighter.hp <= 0) {
+                fighter.transformMesh.dispose();
+            }
+            else {
+                fighter.updateHitPointMesh();
+            }
         }
     }
     ;
@@ -743,17 +768,18 @@ class Fighter {
         this.shieldCapacity = 6;
         this.shieldSpeed = 2;
         this.armor = 1;
-        this.moveRange = 3;
+        this.moveRange = 6;
         this.attackRange = 3;
-        this.attackPower = 3;
+        this.attackPower = 50;
         this.accuracy = 95;
         this.staticAttack = false;
         this.criticalRate = 5;
         this.dodgeRate = 10;
         this.hp = 10;
-        this.shield = 6;
+        this.shield = 5;
         this.hasMoved = false;
         this.hasAttacked = false;
+        this.isAlive = true;
         this.id = Fighter.ID;
         Fighter.ID += 1;
         this.team = team;
@@ -770,6 +796,12 @@ class Fighter {
     }
     initialize() {
         this.speed = Math.floor(Math.random() * 100);
+    }
+    kill() {
+        this.isAlive = false;
+        if (this._tile) {
+            this._tile.removeFighter(this);
+        }
     }
     setTile(t) {
         if (this._tile) {
@@ -1117,12 +1149,9 @@ class AlphaFighterSelector {
         this.overloadPointerUpCallback = undefined;
         AlphaFighterSelector._Instance = this;
         Main.Scene.onPointerObservable.add((eventData) => {
-            console.log("A");
             if (eventData.type === BABYLON.PointerEventTypes.POINTERUP) {
                 let pickedMesh = eventData.pickInfo.pickedMesh;
-                console.log(pickedMesh);
                 if (pickedMesh && pickedMesh.parent) {
-                    console.log(pickedMesh);
                     let fighter = AlphaClient.Instance.findFighter(f => { return f.transformMesh === pickedMesh || f.transformMesh === pickedMesh.parent; });
                     if (fighter) {
                         if (this.overloadPointerUpCallback) {
@@ -1161,6 +1190,9 @@ class AlphaFighter extends Fighter {
         this._reacheableTilesMeshes = [];
         this.clearSpeechBubbleTimeout = -1;
         PilotSpeech.LoadProfessionalSpeeches();
+        setInterval(() => {
+            this.updateHitPointMesh();
+        }, 1000);
     }
     updateMesh(scene) {
         if (!this.transformMesh) {
@@ -1273,9 +1305,9 @@ class AlphaFighter extends Fighter {
         }
         else {
             this._hpLostMesh.isVisible = true;
-            SpaceMeshBuilder.CreateHPVertexData(0, ratioHP).applyToMesh(this._hpLostMesh);
+            SpaceMeshBuilder.CreateHPVertexData(0, 1 - ratioHP).applyToMesh(this._hpLostMesh);
             this._hpLeftMesh.isVisible = true;
-            SpaceMeshBuilder.CreateHPVertexData(ratioHP, 1).applyToMesh(this._hpLeftMesh);
+            SpaceMeshBuilder.CreateHPVertexData(1 - ratioHP, 1).applyToMesh(this._hpLeftMesh);
         }
         let ratioShield = 0;
         if (this.shieldCapacity > 0) {
@@ -1400,16 +1432,16 @@ class AlphaFighter extends Fighter {
     }
     showReachableTiles() {
         this.hideReachableTiles();
-        for (let i = -5; i <= 4; i++) {
-            for (let j = -6; j <= 7; j++) {
-                if (HexagonMath.Distance(0, 0, i, j) <= 3) {
+        for (let i = -this.moveRange; i <= this.moveRange; i++) {
+            for (let j = -this.moveRange; j <= this.moveRange; j++) {
+                if (HexagonMath.Distance(0, 0, i, j) <= this.moveRange) {
                     let tileI = this._tile.i + i;
                     let tileJ = this._tile.j + j;
                     let tile = AlphaClient.Instance.alphaBoard.getTileByIJ(tileI, tileJ);
                     if (tile) {
                         if (!tile.getFighter()) {
                             let mesh = BABYLON.MeshBuilder.CreateCylinder("reachable-tile", {
-                                height: 0.1,
+                                height: 0.01,
                                 diameter: 0.8,
                                 tessellation: 6
                             }, Main.Scene);
@@ -3875,6 +3907,18 @@ class Game {
                             damage -= target.armor;
                             if (damage > 0) {
                                 target.hp -= damage;
+                                if (target.hp <= 0) {
+                                    result = 3;
+                                    target.kill();
+                                    let targetIndex = this._fighters.indexOf(target);
+                                    if (targetIndex !== -1) {
+                                        this._fighters.splice(targetIndex, 1);
+                                    }
+                                    let targetIdIndex = this._fighterOrder.indexOf(targetId);
+                                    if (targetIdIndex !== -1) {
+                                        this._fighterOrder.splice(targetIdIndex, 1);
+                                    }
+                                }
                             }
                         }
                         // Trigger event.

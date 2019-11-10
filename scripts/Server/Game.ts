@@ -174,6 +174,18 @@ class Game {
                             damage -= target.armor;
                             if (damage > 0) {
                                 target.hp -= damage;
+                                if (target.hp <= 0) {
+                                    result = 3;
+                                    target.kill();
+                                    let targetIndex = this._fighters.indexOf(target);
+                                    if (targetIndex !== -1) {
+                                        this._fighters.splice(targetIndex, 1);
+                                    }
+                                    let targetIdIndex = this._fighterOrder.indexOf(targetId);
+                                    if (targetIdIndex !== -1) {
+                                        this._fighterOrder.splice(targetIdIndex, 1);
+                                    }
+                                }
                             }
                         }
 

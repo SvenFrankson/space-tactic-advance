@@ -19,12 +19,9 @@ class AlphaFighterSelector {
         AlphaFighterSelector._Instance = this;
         Main.Scene.onPointerObservable.add(
             (eventData) => {
-                console.log("A");
                 if (eventData.type === BABYLON.PointerEventTypes.POINTERUP) {
                     let pickedMesh = eventData.pickInfo.pickedMesh;
-                    console.log(pickedMesh);
                     if (pickedMesh && pickedMesh.parent) {
-                        console.log(pickedMesh);
                         let fighter = AlphaClient.Instance.findFighter(f => { return f.transformMesh === pickedMesh || f.transformMesh === pickedMesh.parent });
                         if (fighter) {
                             if (this.overloadPointerUpCallback) {
@@ -76,6 +73,12 @@ class AlphaFighter extends Fighter {
     constructor(team?: number) {
         super(team);
         PilotSpeech.LoadProfessionalSpeeches();
+        setInterval(
+            () => {
+                this.updateHitPointMesh();
+            },
+            1000
+        );
     }
 
     public updateMesh(scene: BABYLON.Scene): void {
@@ -206,9 +209,9 @@ class AlphaFighter extends Fighter {
         }
         else {
             this._hpLostMesh.isVisible = true;
-            SpaceMeshBuilder.CreateHPVertexData(0, ratioHP).applyToMesh(this._hpLostMesh);
+            SpaceMeshBuilder.CreateHPVertexData(0, 1 - ratioHP).applyToMesh(this._hpLostMesh);
             this._hpLeftMesh.isVisible = true;
-            SpaceMeshBuilder.CreateHPVertexData(ratioHP, 1).applyToMesh(this._hpLeftMesh);
+            SpaceMeshBuilder.CreateHPVertexData(1 - ratioHP, 1).applyToMesh(this._hpLeftMesh);
         }
 
         let ratioShield = 0;
@@ -343,9 +346,9 @@ class AlphaFighter extends Fighter {
 
     public showReachableTiles(): void {
         this.hideReachableTiles();
-        for (let i = - 5; i <= 4; i++) {
-            for (let j = - 6; j <= 7; j++) {
-                if (HexagonMath.Distance(0, 0, i, j) <= 3) {
+        for (let i = - this.moveRange; i <= this.moveRange; i++) {
+            for (let j = - this.moveRange; j <= this.moveRange; j++) {
+                if (HexagonMath.Distance(0, 0, i, j) <= this.moveRange) {
                     let tileI = this._tile.i + i;
                     let tileJ = this._tile.j + j;
                     let tile = AlphaClient.Instance.alphaBoard.getTileByIJ(tileI, tileJ);
@@ -354,7 +357,7 @@ class AlphaFighter extends Fighter {
                             let mesh = BABYLON.MeshBuilder.CreateCylinder(
                                 "reachable-tile",
                                 {
-                                    height: 0.1,
+                                    height: 0.01,
                                     diameter: 0.8,
                                     tessellation: 6
                                 },
