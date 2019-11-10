@@ -70,9 +70,15 @@ class AlphaFighter extends Fighter {
     private _reacheableTilesMeshes: { mesh: BABYLON.Mesh, pointerUpCallback: () => void }[] = [];
     private _pointerObserver: BABYLON.Observer<BABYLON.PointerInfo>;
 
+    public nature: PilotNature = PilotNature.Professional;
+
     constructor(team?: number) {
         super(team);
+        if (Math.random() < 0.5) {
+            this.nature = PilotNature.Cool;
+        }
         PilotSpeech.LoadProfessionalSpeeches();
+        PilotSpeech.LoadCoolSpeeches();
         setInterval(
             () => {
                 this.updateHitPointMesh();
@@ -250,7 +256,7 @@ class AlphaFighter extends Fighter {
 
     public select(): void {
         this._selectionMesh.isVisible = true;
-        this.showText(PilotSpeech.GetText(PilotNature.Professional, SpeechSituation.Selected));
+        this.showText(SpeechSituation.Selected);
     }
 
     public unselect(): void {
@@ -399,12 +405,12 @@ class AlphaFighter extends Fighter {
     }
 
     public clearSpeechBubbleTimeout: number = -1;
-    public showText(text: string): void {
+    public showText(situation: SpeechSituation): void {
         clearTimeout(this.clearSpeechBubbleTimeout);
         if (this.speechBubble) {
             this.speechBubble.dispose();
         }
-        this.speechBubble = SpeechBubble.CreateSpeechBubble(this.transformMesh, text);
+        this.speechBubble = SpeechBubble.CreateSpeechBubble(this.transformMesh, PilotSpeech.GetText(this.nature, situation));
 
         this.speechBubble.setTarget(this.transformMesh);
 

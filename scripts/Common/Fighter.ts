@@ -35,12 +35,12 @@ class Fighter {
     public armor: number = 1;
     
     public moveRange: number = 6;
-    public attackRange: number = 3;
-    public attackPower: number = 50;
+    public attackRange: number = 1;
+    public attackPower: number = 6;
 
     public accuracy: number = 95;
     public staticAttack: boolean = false;
-    public criticalRate: number = 5;
+    public criticalRate: number = 10;
     public dodgeRate: number = 10;
 
     public hp: number = 10;

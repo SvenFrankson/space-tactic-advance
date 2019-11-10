@@ -661,7 +661,7 @@ class AlphaClient extends Client {
             Main.Camera.currentTarget = activeFighter.transformMesh;
             Main.Camera.currentRadius = 5;
             if (activeFighter.team === this._team) {
-                activeFighter.showText(PilotSpeech.GetText(PilotNature.Professional, SpeechSituation.Ready));
+                activeFighter.showText(SpeechSituation.Ready);
                 activeFighter.showUI();
             }
         }
@@ -669,7 +669,7 @@ class AlphaClient extends Client {
     ;
     onBeforeFighterMoved(fighter, tileI, tileJ) {
         if (fighter instanceof AlphaFighter) {
-            fighter.showText(PilotSpeech.GetText(PilotNature.Professional, SpeechSituation.Move));
+            fighter.showText(SpeechSituation.Move);
             let x0 = fighter.transformMesh.position.x;
             let z0 = fighter.transformMesh.position.z;
             let x1 = 0.75 * tileI;
@@ -707,19 +707,19 @@ class AlphaClient extends Client {
     }
     onFighterHasAttacked(fighter, target, result) {
         if (fighter instanceof AlphaFighter) {
-            fighter.showText(PilotSpeech.GetText(PilotNature.Professional, SpeechSituation.Attack));
+            fighter.showText(SpeechSituation.Attack);
             setTimeout(() => {
                 if (result === 0) {
-                    fighter.showText(PilotSpeech.GetText(PilotNature.Professional, SpeechSituation.AttackMiss));
+                    fighter.showText(SpeechSituation.AttackMiss);
                 }
                 if (result === 1) {
-                    fighter.showText(PilotSpeech.GetText(PilotNature.Professional, SpeechSituation.AttackSuccess));
+                    fighter.showText(SpeechSituation.AttackSuccess);
                 }
                 if (result === 2) {
-                    fighter.showText(PilotSpeech.GetText(PilotNature.Professional, SpeechSituation.AttackCritical));
+                    fighter.showText(SpeechSituation.AttackCritical);
                 }
                 if (result === 3) {
-                    fighter.showText(PilotSpeech.GetText(PilotNature.Professional, SpeechSituation.AttackKill));
+                    fighter.showText(SpeechSituation.AttackKill);
                 }
             }, 3000);
             fighter.updateMesh(Main.Scene);
@@ -744,7 +744,7 @@ class AlphaClient extends Client {
     onFighterPhaseDelayed(fighter) {
         if (fighter instanceof AlphaFighter) {
             if (fighter.team === this._team) {
-                fighter.showText(PilotSpeech.GetText(PilotNature.Professional, SpeechSituation.Hold));
+                fighter.showText(SpeechSituation.Hold);
             }
             fighter.hideReachableTiles();
         }
@@ -752,7 +752,7 @@ class AlphaClient extends Client {
     onFighterPhaseEnded(fighter) {
         if (fighter instanceof AlphaFighter) {
             if (fighter.team === this._team) {
-                fighter.showText(PilotSpeech.GetText(PilotNature.Professional, SpeechSituation.Pass));
+                fighter.showText(SpeechSituation.Pass);
             }
             fighter.hideUI();
             fighter.hideReachableTiles();
@@ -769,11 +769,11 @@ class Fighter {
         this.shieldSpeed = 2;
         this.armor = 1;
         this.moveRange = 6;
-        this.attackRange = 3;
-        this.attackPower = 50;
+        this.attackRange = 1;
+        this.attackPower = 6;
         this.accuracy = 95;
         this.staticAttack = false;
-        this.criticalRate = 5;
+        this.criticalRate = 10;
         this.dodgeRate = 10;
         this.hp = 10;
         this.shield = 5;
@@ -1188,8 +1188,13 @@ class AlphaFighter extends Fighter {
     constructor(team) {
         super(team);
         this._reacheableTilesMeshes = [];
+        this.nature = PilotNature.Professional;
         this.clearSpeechBubbleTimeout = -1;
+        if (Math.random() < 0.5) {
+            this.nature = PilotNature.Cool;
+        }
         PilotSpeech.LoadProfessionalSpeeches();
+        PilotSpeech.LoadCoolSpeeches();
         setInterval(() => {
             this.updateHitPointMesh();
         }, 1000);
@@ -1343,7 +1348,7 @@ class AlphaFighter extends Fighter {
     }
     select() {
         this._selectionMesh.isVisible = true;
-        this.showText(PilotSpeech.GetText(PilotNature.Professional, SpeechSituation.Selected));
+        this.showText(SpeechSituation.Selected);
     }
     unselect() {
         this._selectionMesh.isVisible = false;
@@ -1474,12 +1479,12 @@ class AlphaFighter extends Fighter {
             this._reacheableTilesMeshes.pop().mesh.dispose();
         }
     }
-    showText(text) {
+    showText(situation) {
         clearTimeout(this.clearSpeechBubbleTimeout);
         if (this.speechBubble) {
             this.speechBubble.dispose();
         }
-        this.speechBubble = SpeechBubble.CreateSpeechBubble(this.transformMesh, text);
+        this.speechBubble = SpeechBubble.CreateSpeechBubble(this.transformMesh, PilotSpeech.GetText(this.nature, situation));
         this.speechBubble.setTarget(this.transformMesh);
         this.clearSpeechBubbleTimeout = setTimeout(() => {
             this.speechBubble.dispose();
@@ -1989,6 +1994,7 @@ var PilotNature;
     PilotNature[PilotNature["Angry"] = 1] = "Angry";
     PilotNature[PilotNature["Calm"] = 2] = "Calm";
     PilotNature[PilotNature["Rookie"] = 3] = "Rookie";
+    PilotNature[PilotNature["Cool"] = 4] = "Cool";
 })(PilotNature || (PilotNature = {}));
 var SpeechSituation;
 (function (SpeechSituation) {
@@ -2055,6 +2061,59 @@ class PilotSpeech {
         ]);
         speeches.set(SpeechSituation.Pass, [
             "Over."
+        ]);
+    }
+    static LoadCoolSpeeches() {
+        if (PilotSpeech._Texts.get(PilotNature.Cool)) {
+            return;
+        }
+        let speeches = new Map();
+        PilotSpeech._Texts.set(PilotNature.Cool, speeches);
+        speeches.set(SpeechSituation.Ready, [
+            "Up and ready !",
+            "Diving in !"
+        ]);
+        speeches.set(SpeechSituation.Selected, [
+            "Yeah ?",
+            "What's up ?"
+        ]);
+        speeches.set(SpeechSituation.Move, [
+            "Let's go !",
+            "On my way captain."
+        ]);
+        speeches.set(SpeechSituation.Attack, [
+            "He does not stand a chance !",
+            "Lock and loaded !",
+            "Yahaa !"
+        ]);
+        speeches.set(SpeechSituation.AttackSuccess, [
+            "Eat that !",
+            "Take that !"
+        ]);
+        speeches.set(SpeechSituation.AttackMiss, [
+            "Oops...",
+            "I sliped captain...",
+            "Let's forget about this one..."
+        ]);
+        speeches.set(SpeechSituation.AttackCritical, [
+            "Ha ! In your face !",
+            "Boom ! Wanna cry ?",
+            "Hahahaha !"
+        ]);
+        speeches.set(SpeechSituation.AttackKill, [
+            "See ya !",
+            "Good bye !",
+            "Youhou ! Did you guys see that ?",
+            "Bouhou ! Go back to your mother !"
+        ]);
+        speeches.set(SpeechSituation.Hold, [
+            "I can do that.",
+            "Let them come !",
+            "Wait and see, got it."
+        ]);
+        speeches.set(SpeechSituation.Pass, [
+            "Be right back !",
+            "Now it's up to you guys !"
         ]);
     }
 }

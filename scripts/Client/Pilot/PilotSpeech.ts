@@ -99,4 +99,88 @@ class PilotSpeech {
             ]
         );
     }
+
+    public static LoadCoolSpeeches(): void {
+        if (PilotSpeech._Texts.get(PilotNature.Cool)) {
+            return;
+        }
+        let speeches = new Map<SpeechSituation, string[]>();
+        PilotSpeech._Texts.set(PilotNature.Cool, speeches);
+        speeches.set(
+            SpeechSituation.Ready,
+            [
+                "Up and ready !",
+                "Diving in !"
+            ]
+        );
+        speeches.set(
+            SpeechSituation.Selected,
+            [
+                "Yeah ?",
+                "What's up ?"
+            ]
+        );
+        speeches.set(
+            SpeechSituation.Move,
+            [
+                "Let's go !",
+                "On my way captain."
+            ]
+        );
+        speeches.set(
+            SpeechSituation.Attack,
+            [
+                "He does not stand a chance !",
+                "Lock and loaded !",
+                "Yahaa !"
+            ]
+        );
+        speeches.set(
+            SpeechSituation.AttackSuccess,
+            [
+                "Eat that !",
+                "Take that !"
+            ]
+        );
+        speeches.set(
+            SpeechSituation.AttackMiss,
+            [
+                "Oops...",
+                "I sliped captain...",
+                "Let's forget about this one..."
+            ]
+        );
+        speeches.set(
+            SpeechSituation.AttackCritical,
+            [
+                "Ha ! In your face !",
+                "Boom ! Wanna cry ?",
+                "Hahahaha !"
+            ]
+        );
+        speeches.set(
+            SpeechSituation.AttackKill,
+            [
+                "See ya !",
+                "Good bye !",
+                "Youhou ! Did you guys see that ?",
+                "Bouhou ! Go back to your mother !"
+            ]
+        );
+        speeches.set(
+            SpeechSituation.Hold,
+            [
+                "I can do that.",
+                "Let them come !",
+                "Wait and see, got it."
+            ]
+        );
+        speeches.set(
+            SpeechSituation.Pass,
+            [
+                "Be right back !",
+                "Now it's up to you guys !"
+            ]
+        );
+    }
 }

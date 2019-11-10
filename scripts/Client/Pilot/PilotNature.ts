@@ -2,5 +2,6 @@ enum PilotNature {
     Professional,
     Angry,
     Calm,
-    Rookie
+    Rookie,
+    Cool
 }

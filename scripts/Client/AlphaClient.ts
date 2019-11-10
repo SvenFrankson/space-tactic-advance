@@ -117,7 +117,7 @@ class AlphaClient extends Client {
             Main.Camera.currentTarget = activeFighter.transformMesh;
             Main.Camera.currentRadius = 5;
             if (activeFighter.team === this._team) {
-                activeFighter.showText(PilotSpeech.GetText(PilotNature.Professional, SpeechSituation.Ready));
+                activeFighter.showText(SpeechSituation.Ready);
                 activeFighter.showUI();
             }
         }
@@ -125,7 +125,7 @@ class AlphaClient extends Client {
 
     protected onBeforeFighterMoved(fighter: Fighter, tileI: number, tileJ: number): void {
         if (fighter instanceof AlphaFighter) {
-            fighter.showText(PilotSpeech.GetText(PilotNature.Professional, SpeechSituation.Move));
+            fighter.showText(SpeechSituation.Move);
             let x0 = fighter.transformMesh.position.x;
             let z0 = fighter.transformMesh.position.z;
             let x1 = 0.75 * tileI;
@@ -166,20 +166,20 @@ class AlphaClient extends Client {
 
     protected onFighterHasAttacked(fighter: Fighter, target: Fighter, result: number): void {
         if (fighter instanceof AlphaFighter) {
-            fighter.showText(PilotSpeech.GetText(PilotNature.Professional, SpeechSituation.Attack));
+            fighter.showText(SpeechSituation.Attack);
             setTimeout(
                 () => {
                     if (result === 0) {
-                        fighter.showText(PilotSpeech.GetText(PilotNature.Professional, SpeechSituation.AttackMiss));
+                        fighter.showText(SpeechSituation.AttackMiss);
                     }
                     if (result === 1) {
-                        fighter.showText(PilotSpeech.GetText(PilotNature.Professional, SpeechSituation.AttackSuccess));
+                        fighter.showText(SpeechSituation.AttackSuccess);
                     }
                     if (result === 2) {
-                        fighter.showText(PilotSpeech.GetText(PilotNature.Professional, SpeechSituation.AttackCritical));
+                        fighter.showText(SpeechSituation.AttackCritical);
                     }
                     if (result === 3) {
-                        fighter.showText(PilotSpeech.GetText(PilotNature.Professional, SpeechSituation.AttackKill));
+                        fighter.showText(SpeechSituation.AttackKill);
                     }
                 },
                 3000
@@ -207,7 +207,7 @@ class AlphaClient extends Client {
     protected onFighterPhaseDelayed(fighter: Fighter): void {
         if (fighter instanceof AlphaFighter) {
             if (fighter.team === this._team) {
-                fighter.showText(PilotSpeech.GetText(PilotNature.Professional, SpeechSituation.Hold));
+                fighter.showText(SpeechSituation.Hold);
             }
             fighter.hideReachableTiles();
         }
@@ -216,7 +216,7 @@ class AlphaClient extends Client {
     protected onFighterPhaseEnded(fighter: Fighter): void {
         if (fighter instanceof AlphaFighter) {
             if (fighter.team === this._team) {
-                fighter.showText(PilotSpeech.GetText(PilotNature.Professional, SpeechSituation.Pass));
+                fighter.showText(SpeechSituation.Pass);
             }
             fighter.hideUI();
             fighter.hideReachableTiles();
