@@ -62,9 +62,10 @@ class AlphaFighter extends Fighter {
     public fighterMesh: BABYLON.Mesh;
     private _turnStatusMesh: BABYLON.Mesh;
     private _teamIndicatorMesh: BABYLON.Mesh;
-    private _shieldLeftMesh: BABYLON.Mesh;
     private _hpLeftMesh: BABYLON.Mesh;
     private _hpLostMesh: BABYLON.Mesh;
+    private _shieldLeftMesh: BABYLON.Mesh;
+    private _shieldLostMesh: BABYLON.Mesh;
     private _selectionMesh: BABYLON.Mesh;
 
     public speechBubble: SpeechBubble;
@@ -143,18 +144,23 @@ class AlphaFighter extends Fighter {
         }
         if (!this._hpLeftMesh) {
             this._hpLeftMesh = new BABYLON.Mesh("hp-left-" + this.id);
-            this._hpLeftMesh.parent = this.transformMesh;
+            this._hpLeftMesh.parent = this._teamIndicatorMesh;
             this._hpLeftMesh.material = Main.greenMaterial;
         }
         if (!this._hpLostMesh) {
             this._hpLostMesh = new BABYLON.Mesh("hp-lost-" + this.id);
-            this._hpLostMesh.parent = this.transformMesh;
+            this._hpLostMesh.parent = this._teamIndicatorMesh;
             this._hpLostMesh.material = Main.redMaterial;
         }
         if (!this._shieldLeftMesh) {
             this._shieldLeftMesh = new BABYLON.Mesh("shield-left-" + this.id);
-            this._shieldLeftMesh.parent = this.transformMesh;
+            this._shieldLeftMesh.parent = this._teamIndicatorMesh;
             this._shieldLeftMesh.material = Main.cyanMaterial;
+        }
+        if (!this._shieldLostMesh) {
+            this._shieldLostMesh = new BABYLON.Mesh("shield-lost-" + this.id);
+            this._shieldLostMesh.parent = this._teamIndicatorMesh;
+            this._shieldLostMesh.material = Main.whiteMaterial;
         }
         if (!this._selectionMesh) {
             this._selectionMesh = new BABYLON.Mesh("selection-" + this.id);
@@ -170,9 +176,7 @@ class AlphaFighter extends Fighter {
     }
 
     public rotateHPShieldMesh(r: number): void {
-        this._hpLeftMesh.rotation.y = r;
-        this._hpLostMesh.rotation.y = r;
-        this._shieldLeftMesh.rotation.y = r;
+        this._teamIndicatorMesh.rotation.y = r;
     }
 
     public updateHitPointMesh(): void {
@@ -188,10 +192,10 @@ class AlphaFighter extends Fighter {
             this._hpLostMesh.isVisible = false;
         }
         else {
-            this._hpLeftMesh.isVisible = true;
-            SpaceMeshBuilder.CreateHPVertexData(0, ratioHP).applyToMesh(this._hpLeftMesh);
             this._hpLostMesh.isVisible = true;
-            SpaceMeshBuilder.CreateHPVertexData(ratioHP, 1).applyToMesh(this._hpLostMesh);
+            SpaceMeshBuilder.CreateHPVertexData(0, ratioHP).applyToMesh(this._hpLostMesh);
+            this._hpLeftMesh.isVisible = true;
+            SpaceMeshBuilder.CreateHPVertexData(ratioHP, 1).applyToMesh(this._hpLeftMesh);
         }
 
         let ratioShield = 0;
@@ -200,16 +204,19 @@ class AlphaFighter extends Fighter {
         }
         if (ratioShield <= 0) {
             this._shieldLeftMesh.isVisible = false;
+            this._shieldLostMesh.isVisible = true;
+            SpaceMeshBuilder.CreateShieldVertexData(0, 1).applyToMesh(this._shieldLostMesh);
         }
         else if (ratioShield >= 1) {
             this._shieldLeftMesh.isVisible = true;
-            this._shieldLeftMesh.isVisible = false;
-            SpaceMeshBuilder.CreateHPBar(0.33, 0.18, 0, 1).applyToMesh(this._shieldLeftMesh);
+            SpaceMeshBuilder.CreateShieldVertexData(0, 1).applyToMesh(this._shieldLeftMesh);
+            this._shieldLostMesh.isVisible = false;
         }
         else {
+            this._shieldLostMesh.isVisible = true;
+            SpaceMeshBuilder.CreateShieldVertexData(ratioShield, 1).applyToMesh(this._shieldLostMesh);
             this._shieldLeftMesh.isVisible = true;
-            this._shieldLeftMesh.isVisible = false;
-            SpaceMeshBuilder.CreateHPBar(0.33, 0.18, 0, ratioShield).applyToMesh(this._shieldLeftMesh);
+            SpaceMeshBuilder.CreateShieldVertexData(0, ratioShield).applyToMesh(this._shieldLeftMesh);
         }
     }
 

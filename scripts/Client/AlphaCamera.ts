@@ -30,13 +30,11 @@ class AlphaCamera extends BABYLON.ArcRotateCamera {
         BABYLON.Vector3.LerpToRef(this.target, this._currentTargetPos, 0.05, this.target);
         this.radius = this.radius * 0.95 + this.currentRadius * 0.05;
         let dir = 3 * Math.PI / 2 - this.alpha;
-        dir = Math.round(dir / (Math.PI / 3));
         if (dir !== this._lastDir) {
             this._lastDir = dir;
-            let r = dir * Math.PI / 3;
             AlphaClient.Instance.forEachFighter(
                 (f) => {
-                    f.rotateHPShieldMesh(r);
+                    f.rotateHPShieldMesh(dir);
                 }
             )
         }

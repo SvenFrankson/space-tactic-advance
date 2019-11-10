@@ -385,12 +385,10 @@ class AlphaCamera extends BABYLON.ArcRotateCamera {
             BABYLON.Vector3.LerpToRef(this.target, this._currentTargetPos, 0.05, this.target);
             this.radius = this.radius * 0.95 + this.currentRadius * 0.05;
             let dir = 3 * Math.PI / 2 - this.alpha;
-            dir = Math.round(dir / (Math.PI / 3));
             if (dir !== this._lastDir) {
                 this._lastDir = dir;
-                let r = dir * Math.PI / 3;
                 AlphaClient.Instance.forEachFighter((f) => {
-                    f.rotateHPShieldMesh(r);
+                    f.rotateHPShieldMesh(dir);
                 });
             }
         };
@@ -1223,18 +1221,23 @@ class AlphaFighter extends Fighter {
         }
         if (!this._hpLeftMesh) {
             this._hpLeftMesh = new BABYLON.Mesh("hp-left-" + this.id);
-            this._hpLeftMesh.parent = this.transformMesh;
+            this._hpLeftMesh.parent = this._teamIndicatorMesh;
             this._hpLeftMesh.material = Main.greenMaterial;
         }
         if (!this._hpLostMesh) {
             this._hpLostMesh = new BABYLON.Mesh("hp-lost-" + this.id);
-            this._hpLostMesh.parent = this.transformMesh;
+            this._hpLostMesh.parent = this._teamIndicatorMesh;
             this._hpLostMesh.material = Main.redMaterial;
         }
         if (!this._shieldLeftMesh) {
             this._shieldLeftMesh = new BABYLON.Mesh("shield-left-" + this.id);
-            this._shieldLeftMesh.parent = this.transformMesh;
+            this._shieldLeftMesh.parent = this._teamIndicatorMesh;
             this._shieldLeftMesh.material = Main.cyanMaterial;
+        }
+        if (!this._shieldLostMesh) {
+            this._shieldLostMesh = new BABYLON.Mesh("shield-lost-" + this.id);
+            this._shieldLostMesh.parent = this._teamIndicatorMesh;
+            this._shieldLostMesh.material = Main.whiteMaterial;
         }
         if (!this._selectionMesh) {
             this._selectionMesh = new BABYLON.Mesh("selection-" + this.id);
@@ -1249,9 +1252,7 @@ class AlphaFighter extends Fighter {
         this.updateHitPointMesh();
     }
     rotateHPShieldMesh(r) {
-        this._hpLeftMesh.rotation.y = r;
-        this._hpLostMesh.rotation.y = r;
-        this._shieldLeftMesh.rotation.y = r;
+        this._teamIndicatorMesh.rotation.y = r;
     }
     updateHitPointMesh() {
         let ratioHP = this.hp / this.stamina;
@@ -1266,10 +1267,10 @@ class AlphaFighter extends Fighter {
             this._hpLostMesh.isVisible = false;
         }
         else {
-            this._hpLeftMesh.isVisible = true;
-            SpaceMeshBuilder.CreateHPVertexData(0, ratioHP).applyToMesh(this._hpLeftMesh);
             this._hpLostMesh.isVisible = true;
-            SpaceMeshBuilder.CreateHPVertexData(ratioHP, 1).applyToMesh(this._hpLostMesh);
+            SpaceMeshBuilder.CreateHPVertexData(0, ratioHP).applyToMesh(this._hpLostMesh);
+            this._hpLeftMesh.isVisible = true;
+            SpaceMeshBuilder.CreateHPVertexData(ratioHP, 1).applyToMesh(this._hpLeftMesh);
         }
         let ratioShield = 0;
         if (this.shieldCapacity > 0) {
@@ -1277,16 +1278,19 @@ class AlphaFighter extends Fighter {
         }
         if (ratioShield <= 0) {
             this._shieldLeftMesh.isVisible = false;
+            this._shieldLostMesh.isVisible = true;
+            SpaceMeshBuilder.CreateShieldVertexData(0, 1).applyToMesh(this._shieldLostMesh);
         }
         else if (ratioShield >= 1) {
             this._shieldLeftMesh.isVisible = true;
-            this._shieldLeftMesh.isVisible = false;
-            SpaceMeshBuilder.CreateHPBar(0.33, 0.18, 0, 1).applyToMesh(this._shieldLeftMesh);
+            SpaceMeshBuilder.CreateShieldVertexData(0, 1).applyToMesh(this._shieldLeftMesh);
+            this._shieldLostMesh.isVisible = false;
         }
         else {
+            this._shieldLostMesh.isVisible = true;
+            SpaceMeshBuilder.CreateShieldVertexData(ratioShield, 1).applyToMesh(this._shieldLostMesh);
             this._shieldLeftMesh.isVisible = true;
-            this._shieldLeftMesh.isVisible = false;
-            SpaceMeshBuilder.CreateHPBar(0.33, 0.18, 0, ratioShield).applyToMesh(this._shieldLeftMesh);
+            SpaceMeshBuilder.CreateShieldVertexData(0, ratioShield).applyToMesh(this._shieldLeftMesh);
         }
     }
     updateTurnStatus(status) {
@@ -1559,6 +1563,36 @@ class SpaceMeshBuilder {
         let aMax = a0 * (1 - max) + a1 * max;
         let r0 = 0.285;
         let r1 = 0.22;
+        let rMin = r0 * (1 - min) + r1 * min;
+        let rMax = r0 * (1 - max) + r1 * max;
+        for (let i = 0; i <= 12; i++) {
+            let f = i / 12;
+            let a = aMin * (1 - f) + aMax * f;
+            let r = rMin * (1 - f) + rMax * f;
+            let p = new BABYLON.Vector3(Math.cos(a), 0.05, Math.sin(a));
+            positions.push(p.x * r, -0.001, p.z * r, p.x * 0.335, -0.001, p.z * 0.335);
+            normals.push(0, 1, 0, 0, 1, 0);
+        }
+        for (let i = 0; i < 12; i++) {
+            indices.push(2 * i, 2 * i + 1, 2 * (i + 1) + 1);
+            indices.push(2 * i, 2 * (i + 1) + 1, 2 * (i + 1));
+        }
+        data.positions = positions;
+        data.indices = indices;
+        data.normals = normals;
+        return data;
+    }
+    static CreateShieldVertexData(min, max) {
+        let data = new BABYLON.VertexData();
+        let positions = [];
+        let indices = [];
+        let normals = [];
+        let a0 = 3 * Math.PI / 2;
+        let a1 = 26 * Math.PI / 12;
+        let aMin = a0 * (1 - min) + a1 * min;
+        let aMax = a0 * (1 - max) + a1 * max;
+        let r0 = 0.22;
+        let r1 = 0.285;
         let rMin = r0 * (1 - min) + r1 * min;
         let rMax = r0 * (1 - max) + r1 * max;
         for (let i = 0; i <= 12; i++) {
