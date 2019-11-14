@@ -28,14 +28,14 @@ class Game {
         )
 
         for (let i = 0; i < 3; i++) {
-            let team0Fighter = new Fighter(0);
+            let team0Fighter = Fighter.CreateRandom(0);
             team0Fighter.initialize();
             let tile = this._board.getTileByIJ(-3, - 1 + 2 * i);
             tile.setFighter(team0Fighter);
             this._fighters.push(team0Fighter);
         }
         for (let i = 0; i < 3; i++) {
-            let team1Fighter = new Fighter(1);
+            let team1Fighter = Fighter.CreateRandom(1);
             team1Fighter.initialize();
             let tile = this._board.getTileByIJ(3, - 1 + 2 * i);
             tile.setFighter(team1Fighter);

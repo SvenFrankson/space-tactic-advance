@@ -22,18 +22,13 @@ class SpaceShip extends BABYLON.Mesh {
 	public trailMeshes: TrailMesh[] = [];
 
 	public canons: BABYLON.Vector3[] = [];
-	public shootSpeed: number = 100;
+	public shootSpeed: number = 0.1;
 	public shootCoolDown: number = 0.3;
 	public _shootCool: number = 0;
 
 	constructor(data?: ISpaceshipData, scene?: BABYLON.Scene) {
 		super("spaceship", scene);
 		
-		if (data) {
-			this.shootCoolDown = data.shootCooldown * (0.95 + 0.1 * Math.random());
-			this.shootSpeed = data.shootSpeed * (0.95 + 0.1 * Math.random());
-		}
-
 		this._localX = new BABYLON.Vector3(1, 0, 0);
 		this._localY = new BABYLON.Vector3(0, 1, 0);
 		this._localZ = new BABYLON.Vector3(0, 0, 1);
@@ -170,18 +165,14 @@ class SpaceShip extends BABYLON.Mesh {
 			return;
 		}
 		this._shootCool = this.shootCoolDown;
-		let dir = direction.clone();
-		if (SpaceMath.Angle(dir, this.localZ) > Math.PI / 16) {
-			let n = BABYLON.Vector3.Cross(this.localZ, dir);
-			let m = BABYLON.Matrix.RotationAxis(n, Math.PI / 16);
-			BABYLON.Vector3.TransformNormalToRef(this.localZ, m, dir);
-		}
-		let bullet = new Projectile(dir, this);
+		let bullet = new Projectile(direction, this);
 		this._lastCanonIndex = (this._lastCanonIndex + 1) % this.canons.length;
 		let canon = this.canons[this._lastCanonIndex];
+		console.log(canon);
+		console.log(this.getWorldMatrix());
 		this.shootFlashParticle.parent = this.mesh;
 		this.shootFlashParticle.flash(canon);
-		let canonWorld = BABYLON.Vector3.TransformCoordinates(canon, this.mesh.getWorldMatrix());
+		let canonWorld = BABYLON.Vector3.TransformCoordinates(canon.scale(0.15), this.getWorldMatrix());
 		bullet.position.copyFrom(canonWorld);
 		bullet.instantiate();
 	}

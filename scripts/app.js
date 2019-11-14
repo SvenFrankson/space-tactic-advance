@@ -148,159 +148,6 @@ class VertexDataLoader {
         return colorizedVertexDatas;
     }
 }
-class Building extends BABYLON.Mesh {
-    constructor(width = 8, depth = 8, floors = 2) {
-        super("building");
-        this.width = width;
-        this.depth = depth;
-        this.floors = floors;
-        this._wallColumnMaterial = new BABYLON.StandardMaterial("wall-column-material", Main.Scene);
-        this._wallColumnMaterial.diffuseColor.copyFromFloats(Math.random() * 0.5, Math.random() * 0.5, Math.random() * 0.5);
-        this._wallColumnMaterial.specularColor.copyFromFloats(0.1, 0.1, 0.1);
-        this._wallBorderMaterial = new BABYLON.StandardMaterial("wall-border-material", Main.Scene);
-        let r = Math.random() * 0.25 + 0.25;
-        this._wallBorderMaterial.diffuseColor.copyFromFloats(r, r, r);
-        this._wallBorderMaterial.specularColor.copyFromFloats(0.1, 0.1, 0.1);
-        this._windowGlassMaterial = new BABYLON.StandardMaterial("window-glass-material", Main.Scene);
-        this._windowGlassMaterial.diffuseColor.copyFromFloats(Math.random() * 0.5 + 0.5, Math.random() * 0.5 + 0.5, 1);
-        this._windowGlassMaterial.specularColor.copyFromFloats(0.1, 0.1, 0.1);
-        this._windowForgeMaterial = new BABYLON.StandardMaterial("window-forge-material", Main.Scene);
-        r = Math.random() * 0.25;
-        this._windowForgeMaterial.diffuseColor.copyFromFloats(r, r, r);
-        this._windowForgeMaterial.specularColor.copyFromFloats(0.1, 0.1, 0.1);
-    }
-    async instantiate() {
-        let datas = await VertexDataLoader.instance.get("building_toon_test");
-        let wallMainData = datas.get("wall-main");
-        if (wallMainData) {
-            wallMainData = BuildingVertexData.WidthDepth(wallMainData, this.width, this.depth);
-            let wallMainMaterial = new BABYLON.StandardMaterial("wall-main-material", Main.Scene);
-            wallMainMaterial.diffuseColor.copyFromFloats(Math.random() * 0.5 + 0.5, Math.random() * 0.5 + 0.5, Math.random() * 0.5 + 0.5);
-            wallMainMaterial.specularColor.copyFromFloats(0.1, 0.1, 0.1);
-            for (let i = 0; i < this.floors; i++) {
-                let wallMain = new BABYLON.Mesh("wall-main");
-                wallMainData.applyToMesh(wallMain);
-                wallMain.position.y = 3 * i;
-                wallMain.material = wallMainMaterial;
-                let x0 = -1.2 - (this.width / 2 - 1);
-                let l = Math.abs(2 * x0);
-                let n = Math.floor(l / 2.5);
-                let d = l / (2 * n);
-                if (n > 0) {
-                    let windowData = datas.get("window");
-                    if (windowData) {
-                        for (let j = 0; j < n; j++) {
-                            let window = new BABYLON.Mesh("window");
-                            windowData.applyToMesh(window);
-                            window.position.x = x0 + d + 2 * d * j;
-                            window.position.y = 3 * i + 1.8;
-                            window.position.z = 1.35 + (this.depth / 2 - 1);
-                            window.material = this._wallColumnMaterial;
-                        }
-                    }
-                    let windowGlassData = datas.get("window-glass");
-                    if (windowGlassData) {
-                        for (let j = 0; j < n; j++) {
-                            let windowGlass = new BABYLON.Mesh("window-glass");
-                            windowGlassData.applyToMesh(windowGlass);
-                            windowGlass.position.x = x0 + d + 2 * d * j;
-                            windowGlass.position.y = 3 * i + 1.8;
-                            windowGlass.position.z = 1.35 + (this.depth / 2 - 1);
-                            windowGlass.material = this._windowGlassMaterial;
-                        }
-                    }
-                    let windowForgeData = datas.get("window-forge");
-                    if (windowForgeData) {
-                        for (let j = 0; j < n; j++) {
-                            let windowForge = new BABYLON.Mesh("window-forge");
-                            windowForgeData.applyToMesh(windowForge);
-                            windowForge.position.x = x0 + d + 2 * d * j;
-                            windowForge.position.y = 3 * i + 1.8;
-                            windowForge.position.z = 1.35 + (this.depth / 2 - 1);
-                            windowForge.material = this._windowForgeMaterial;
-                        }
-                    }
-                }
-            }
-        }
-        let wallMainShadowData = datas.get("wall-main-shadow");
-        if (wallMainShadowData) {
-            wallMainShadowData = BuildingVertexData.WidthDepth(wallMainShadowData, this.width, this.depth);
-            let wallMainShadowMaterial = new BABYLON.StandardMaterial("wall-main-shadow-material", Main.Scene);
-            wallMainShadowMaterial.diffuseTexture = new BABYLON.Texture("datas/textures/square_frame_shadow.png", Main.Scene);
-            wallMainShadowMaterial.diffuseTexture.hasAlpha = true;
-            wallMainShadowMaterial.useAlphaFromDiffuseTexture = true;
-            wallMainShadowMaterial.specularColor.copyFromFloats(0, 0, 0);
-            for (let i = 0; i < this.floors; i++) {
-                let wallMainShadow = new BABYLON.Mesh("wall-main-shadow");
-                wallMainShadowData.applyToMesh(wallMainShadow);
-                wallMainShadow.position.y = 3 * i;
-                wallMainShadow.material = wallMainShadowMaterial;
-                wallMainShadow.visibility = 0.5;
-            }
-        }
-        let wallBorderData = datas.get("wall-border");
-        if (wallBorderData) {
-            wallBorderData = BuildingVertexData.WidthDepth(wallBorderData, this.width, this.depth);
-            for (let i = 0; i < this.floors; i++) {
-                let wallBorder = new BABYLON.Mesh("wall-border");
-                wallBorderData.applyToMesh(wallBorder);
-                wallBorder.position.y = 3 * i;
-                wallBorder.material = this._wallBorderMaterial;
-            }
-        }
-        let wallColumnData = datas.get("wall-column");
-        if (wallColumnData) {
-            wallColumnData = BuildingVertexData.WidthDepth(wallColumnData, this.width, this.depth);
-            for (let i = 0; i < this.floors; i++) {
-                let wallColumn = new BABYLON.Mesh("wall-column");
-                wallColumnData.applyToMesh(wallColumn);
-                wallColumn.position.y = 3 * i;
-                wallColumn.material = this._wallColumnMaterial;
-            }
-        }
-        let roofTopData = datas.get("roof-top");
-        if (roofTopData) {
-            roofTopData = BuildingVertexData.WidthDepth(roofTopData, this.width, this.depth);
-            let roofTop = new BABYLON.Mesh("roof-top");
-            roofTopData.applyToMesh(roofTop);
-            roofTop.position.y = 3 * this.floors;
-        }
-        let roofBorderData = datas.get("roof-border");
-        if (roofBorderData) {
-            roofBorderData = BuildingVertexData.WidthDepth(roofBorderData, this.width, this.depth);
-            let roofBorder = new BABYLON.Mesh("roof-border");
-            roofBorderData.applyToMesh(roofBorder);
-            roofBorder.position.y = 3 * this.floors;
-            roofBorder.material = this._wallBorderMaterial;
-        }
-    }
-}
-class BuildingVertexData {
-    static WidthDepth(vertexData, w, d) {
-        let newData = VertexDataLoader.clone(vertexData);
-        let newPositions = [...newData.positions];
-        let l = newPositions.length / 3;
-        let xOffset = w / 2 - 1;
-        let zOffset = d / 2 - 1;
-        for (let i = 0; i < l; i++) {
-            if (newPositions[3 * i] < 0) {
-                newPositions[3 * i] -= xOffset;
-            }
-            else if (newPositions[3 * i] > 0) {
-                newPositions[3 * i] += xOffset;
-            }
-            if (newPositions[3 * i + 2] < 0) {
-                newPositions[3 * i + 2] -= zOffset;
-            }
-            else if (newPositions[3 * i + 2] > 0) {
-                newPositions[3 * i + 2] += zOffset;
-            }
-        }
-        newData.positions = newPositions;
-        return newData;
-    }
-}
 class IBoardData {
 }
 class Board {
@@ -370,7 +217,7 @@ class AlphaBoard extends Board {
 class AlphaCamera extends BABYLON.ArcRotateCamera {
     constructor() {
         super("alpha-camera", 0, 0, 1, new BABYLON.Vector3(0, 0, 0), Main.Scene);
-        this.currentRadius = 5;
+        this.currentRadius = 4;
         this._currentTargetPos = BABYLON.Vector3.Zero();
         this._update = () => {
             if (this.currentTarget instanceof BABYLON.Vector3) {
@@ -442,6 +289,7 @@ class Client {
             if (tile) {
                 tile.setFighter(fighter);
             }
+            fighter.initialize();
             this._fighters.push(fighter);
             fightersAdded.push(fighter);
         }
@@ -612,23 +460,19 @@ class AlphaClient extends Client {
     onFighterOrderUpdated() {
         let container = document.getElementById("fighters-order");
         container.innerHTML = "";
-        console.log(this._fighters);
         for (let i = 0; i < this._fighters.length; i++) {
             let fighter = this._fighters[i];
-            console.log("I = " + i);
-            console.log(fighter);
             fighter.updateTurnStatus(-1);
         }
-        console.log(this._fighterOrder);
         for (let i = 0; i < this._fighterOrder.length; i++) {
             let fighterId = this._fighterOrder[i];
-            console.log("FighterId = " + fighterId);
             let fighter = this.getFighterByID(fighterId);
             fighter.updateTurnStatus(i);
             let dElement = document.createElement("div");
             dElement.classList.add("fighter-order-element");
+            dElement.style.color = "white";
             let idElement = document.createElement("div");
-            idElement.textContent = "ID = " + fighter.id;
+            idElement.textContent = fighter.pilot.name + " #" + fighter.id;
             dElement.appendChild(idElement);
             let speedElement = document.createElement("div");
             speedElement.textContent = "SPEED = " + fighter.speed;
@@ -706,8 +550,27 @@ class AlphaClient extends Client {
         }
     }
     onFighterHasAttacked(fighter, target, result) {
-        if (fighter instanceof AlphaFighter) {
+        if (fighter instanceof AlphaFighter && target instanceof AlphaFighter) {
             fighter.showText(SpeechSituation.Attack);
+            let aimAnimation = () => {
+                let dir = BABYLON.Vector3.TransformNormal(BABYLON.Axis.Z, fighter.fighterMesh.getWorldMatrix());
+                dir.normalize();
+                let targetDir2D = new BABYLON.Vector2(target.transformMesh.position.x, target.transformMesh.position.z);
+                targetDir2D.x -= fighter.transformMesh.position.x;
+                targetDir2D.y -= fighter.transformMesh.position.z;
+                let a = Math2D.AngleFromTo(targetDir2D, new BABYLON.Vector2(0, 1), false);
+                if (!Math2D.AreEqualsCircular(a, fighter.fighterMesh.rotation.y, Math.PI / 120)) {
+                    let dA = Math2D.StepFromToCirular(fighter.fighterMesh.rotation.y, a, Math.PI / 120);
+                    fighter.fighterMesh.rotation.y = dA;
+                    requestAnimationFrame(aimAnimation);
+                }
+                else {
+                    console.log("Shoot !");
+                    fighter.fighterMesh.rotation.y = a;
+                    fighter.shoot(target.transformMesh.position);
+                }
+            };
+            aimAnimation();
             setTimeout(() => {
                 if (result === 0) {
                     fighter.showText(SpeechSituation.AttackMiss);
@@ -763,18 +626,18 @@ class IFighterData {
 }
 class Fighter {
     constructor(team) {
-        this.speed = 10;
+        this.speed = 50;
         this.stamina = 10;
-        this.shieldCapacity = 6;
-        this.shieldSpeed = 2;
-        this.armor = 1;
-        this.moveRange = 6;
+        this.shieldCapacity = 5;
+        this.shieldSpeed = 1;
+        this.armor = 0;
+        this.moveRange = 3;
         this.attackRange = 1;
-        this.attackPower = 6;
+        this.attackPower = 5;
         this.accuracy = 95;
         this.staticAttack = false;
-        this.criticalRate = 10;
-        this.dodgeRate = 10;
+        this.criticalRate = 5;
+        this.dodgeRate = 5;
         this.hp = 10;
         this.shield = 5;
         this.hasMoved = false;
@@ -795,7 +658,8 @@ class Fighter {
         }
     }
     initialize() {
-        this.speed = Math.floor(Math.random() * 100);
+        this.spaceship.initialize();
+        this.pilot.initialize();
     }
     kill() {
         this.isAlive = false;
@@ -816,18 +680,8 @@ class Fighter {
         let data = {
             id: this.id,
             team: this.team,
-            speed: this.speed,
-            stamina: this.stamina,
-            shieldCapacity: this.shieldCapacity,
-            shieldSpeed: this.shieldSpeed,
-            armor: this.armor,
-            moveRange: this.moveRange,
-            attackRange: this.attackRange,
-            attackPower: this.attackPower,
-            accuracy: this.accuracy,
-            staticAttack: this.staticAttack,
-            criticalRate: this.criticalRate,
-            dodgeRate: this.dodgeRate
+            pilot: this.pilot.serialize(),
+            spaceship: this.spaceship.serialize()
         };
         if (this._tile) {
             data.i = this._tile.i;
@@ -838,18 +692,18 @@ class Fighter {
     static deserialize(data, fighter) {
         fighter.id = data.id;
         fighter.team = data.team;
-        fighter.speed = data.speed;
-        fighter.stamina = data.stamina;
-        fighter.shieldCapacity = data.shieldCapacity;
-        fighter.shieldSpeed = data.shieldSpeed;
-        fighter.armor = data.armor;
-        fighter.moveRange = data.moveRange;
-        fighter.attackRange = data.attackRange;
-        fighter.attackPower = data.attackPower;
-        fighter.accuracy = data.accuracy;
-        fighter.staticAttack = data.staticAttack;
-        fighter.criticalRate = data.criticalRate;
-        fighter.dodgeRate = data.dodgeRate;
+        fighter.pilot = new Pilot(fighter);
+        Pilot.Deserialize(data.pilot, fighter.pilot);
+        fighter.spaceship = new Spaceship(fighter);
+        Spaceship.Deserialize(data.spaceship, fighter.spaceship);
+        return fighter;
+    }
+    static CreateRandom(team) {
+        let fighter = new Fighter(team);
+        fighter.pilot = new Pilot(fighter);
+        Pilot.Deserialize(Pilot.RandomData(), fighter.pilot);
+        fighter.spaceship = new Spaceship(fighter);
+        Spaceship.Deserialize(Spaceship.RandomData(), fighter.spaceship);
         return fighter;
     }
 }
@@ -1204,15 +1058,15 @@ class AlphaFighter extends Fighter {
             this.transformMesh = new BABYLON.Mesh("fighter-" + this.id);
         }
         if (!this.fighterMesh) {
-            let spaceship = new SpaceShip();
-            spaceship.name = "Demo";
-            spaceship.initialize({
+            this.fighterMesh = new SpaceShip();
+            this.fighterMesh.name = "Demo";
+            this.fighterMesh.initialize({
                 type: "root",
-                name: "body-1",
+                name: this.spaceship.body.meshName,
                 children: [
                     {
                         type: "wingL",
-                        name: "wing-1",
+                        name: this.spaceship.wingL.meshName,
                         children: [
                             {
                                 type: "weapon",
@@ -1222,7 +1076,7 @@ class AlphaFighter extends Fighter {
                     },
                     {
                         type: "wingR",
-                        name: "wing-1",
+                        name: this.spaceship.wingR.meshName,
                         children: [
                             {
                                 type: "weapon",
@@ -1232,7 +1086,6 @@ class AlphaFighter extends Fighter {
                     }
                 ]
             }, "#ffdddd", "#ddbbbb");
-            this.fighterMesh = spaceship;
             this.fighterMesh.scaling.copyFromFloats(0.15, 0.15, 0.15);
             this.fighterMesh.parent = this.transformMesh;
             this.fighterMesh.position.y = 0.25;
@@ -1490,6 +1343,10 @@ class AlphaFighter extends Fighter {
             this.speechBubble.dispose();
             this.speechBubble = undefined;
         }, 3000);
+    }
+    shoot(target) {
+        let dir = target.subtract(this.transformMesh.position).normalize();
+        this.fighterMesh.shoot(dir);
     }
 }
 class SpaceMath {
@@ -1988,14 +1845,6 @@ class SpaceshipLoader {
         });
     }
 }
-var PilotNature;
-(function (PilotNature) {
-    PilotNature[PilotNature["Professional"] = 0] = "Professional";
-    PilotNature[PilotNature["Angry"] = 1] = "Angry";
-    PilotNature[PilotNature["Calm"] = 2] = "Calm";
-    PilotNature[PilotNature["Rookie"] = 3] = "Rookie";
-    PilotNature[PilotNature["Cool"] = 4] = "Cool";
-})(PilotNature || (PilotNature = {}));
 var SpeechSituation;
 (function (SpeechSituation) {
     SpeechSituation[SpeechSituation["Ready"] = 0] = "Ready";
@@ -2057,7 +1906,7 @@ class PilotSpeech {
         ]);
         speeches.set(SpeechSituation.Hold, [
             "Holding position, over.",
-            "Stand by."
+            "Standing by."
         ]);
         speeches.set(SpeechSituation.Pass, [
             "Over."
@@ -2127,10 +1976,12 @@ class Projectile extends BABYLON.Mesh {
             let dt = this.getEngine().getDeltaTime() / 1000;
             this._lifeSpan -= dt;
             if (this._lifeSpan < 0) {
+                console.log("Destroy projectile (negative lifespan)");
                 return this.destroy();
             }
             let hitSpaceship = Math.random() < 0.01;
             if (hitSpaceship) {
+                console.log("Destroy projectile (hit spaceship");
                 return this.destroy();
             }
             this.position.addInPlace(this._direction.scale(this.shotSpeed * dt));
@@ -2149,16 +2000,19 @@ class Projectile extends BABYLON.Mesh {
         this._direction = direction;
         this.shooter = shooter;
         this.shotSpeed = this.shooter.shootSpeed;
-        this.position.copyFrom(shooter.position);
-        this.rotationQuaternion = shooter.rotationQuaternion.clone();
-        this._displacementRay = new BABYLON.Ray(this.position, this._direction.clone());
+        this.position.copyFrom(shooter.absolutePosition);
+        this.rotationQuaternion = BABYLON.Quaternion.FromEulerVector(shooter.rotation);
+        this.scaling.copyFromFloats(0.15, 0.15, 0.15);
+        this._displacementRay = new BABYLON.Ray(this.absolutePosition, this._direction.clone());
         this.getScene().onBeforeRenderObservable.add(this._update);
     }
     async instantiate() {
-        let vertexData = await VertexDataLoader.instance.get("blaster-trail")[0];
+        let vertexData = await VertexDataLoader.instance.getColorized("blaster-trail");
+        console.log(vertexData);
         if (vertexData && !this.isDisposed()) {
             vertexData.applyToMesh(this);
         }
+        Main.Camera.currentTarget = this;
     }
     destroy() {
         this.getScene().onBeforeRenderObservable.removeCallback(this._update);
@@ -2602,16 +2456,12 @@ class SpaceShip extends BABYLON.Mesh {
         this._colliders = [];
         this.trailMeshes = [];
         this.canons = [];
-        this.shootSpeed = 100;
+        this.shootSpeed = 0.1;
         this.shootCoolDown = 0.3;
         this._shootCool = 0;
         this.onDestroyObservable = new BABYLON.Observable();
         this._canonNodes = [];
         this._lastCanonIndex = 0;
-        if (data) {
-            this.shootCoolDown = data.shootCooldown * (0.95 + 0.1 * Math.random());
-            this.shootSpeed = data.shootSpeed * (0.95 + 0.1 * Math.random());
-        }
         this._localX = new BABYLON.Vector3(1, 0, 0);
         this._localY = new BABYLON.Vector3(0, 1, 0);
         this._localZ = new BABYLON.Vector3(0, 0, 1);
@@ -2737,18 +2587,14 @@ class SpaceShip extends BABYLON.Mesh {
             return;
         }
         this._shootCool = this.shootCoolDown;
-        let dir = direction.clone();
-        if (SpaceMath.Angle(dir, this.localZ) > Math.PI / 16) {
-            let n = BABYLON.Vector3.Cross(this.localZ, dir);
-            let m = BABYLON.Matrix.RotationAxis(n, Math.PI / 16);
-            BABYLON.Vector3.TransformNormalToRef(this.localZ, m, dir);
-        }
-        let bullet = new Projectile(dir, this);
+        let bullet = new Projectile(direction, this);
         this._lastCanonIndex = (this._lastCanonIndex + 1) % this.canons.length;
         let canon = this.canons[this._lastCanonIndex];
+        console.log(canon);
+        console.log(this.getWorldMatrix());
         this.shootFlashParticle.parent = this.mesh;
         this.shootFlashParticle.flash(canon);
-        let canonWorld = BABYLON.Vector3.TransformCoordinates(canon, this.mesh.getWorldMatrix());
+        let canonWorld = BABYLON.Vector3.TransformCoordinates(canon.scale(0.15), this.getWorldMatrix());
         bullet.position.copyFrom(canonWorld);
         bullet.instantiate();
     }
@@ -2783,26 +2629,8 @@ class SpaceShipFactory {
         }
         return "#00ff00";
     }
-    static async AddSpaceShipToScene(data, scene) {
-        let spaceshipData = await SpaceshipLoader.instance.get(data.url);
-        let spaceShip = new SpaceShip(spaceshipData, Main.Scene);
-        spaceShip.name = data.name;
-        await spaceShip.initialize(spaceshipData.model, SpaceShipFactory.baseColorFromTeam(data.team), SpaceShipFactory.detailColorFromTeam(data.team));
-        if (isFinite(data.x) && isFinite(data.y) && isFinite(data.z)) {
-            spaceShip.position.copyFromFloats(data.x, data.y, data.z);
-        }
-        if (isFinite(data.rx) && isFinite(data.ry) && isFinite(data.rz) && isFinite(data.rw)) {
-            spaceShip.rotationQuaternion.copyFromFloats(data.rx, data.ry, data.rz, data.rw);
-        }
-        RuntimeUtils.NextFrame(Main.Scene, () => {
-            spaceShip.trailMeshes.forEach((t) => {
-                t.foldToGenerator();
-            });
-        });
-        return spaceShip;
-    }
     static async LoadSpaceshipPart(part, scene, baseColor, detailColor) {
-        let data = await VertexDataLoader.instance.getColorized(part, baseColor, detailColor);
+        let data = await VertexDataLoader.instance.getColorized(part, baseColor, detailColor, "#ff0000", "#00ff00", "#0000ff");
         let m = new BABYLON.Mesh(part, Main.Scene);
         m.layerMask = 1;
         data.applyToMesh(m);
@@ -3127,6 +2955,306 @@ class Tile {
         return new Tile(data.i, data.j);
     }
 }
+var Gender;
+(function (Gender) {
+    Gender[Gender["Male"] = 0] = "Male";
+    Gender[Gender["Female"] = 1] = "Female";
+})(Gender || (Gender = {}));
+var PilotNature;
+(function (PilotNature) {
+    PilotNature[PilotNature["Professional"] = 0] = "Professional";
+    PilotNature[PilotNature["Angry"] = 1] = "Angry";
+    PilotNature[PilotNature["Calm"] = 2] = "Calm";
+    PilotNature[PilotNature["Rookie"] = 3] = "Rookie";
+    PilotNature[PilotNature["Cool"] = 4] = "Cool";
+})(PilotNature || (PilotNature = {}));
+class Pilot {
+    constructor(fighter) {
+        this.fighter = fighter;
+    }
+    initialize() {
+        if (this.nature === PilotNature.Professional) {
+            this.fighter.accuracy += 5;
+            this.fighter.criticalRate -= 5;
+        }
+        if (this.nature === PilotNature.Cool) {
+            this.fighter.speed -= 5;
+            this.fighter.criticalRate += 5;
+        }
+        if (this.nature === PilotNature.Angry) {
+            this.fighter.attackPower += 5;
+            this.fighter.dodgeRate -= 5;
+        }
+        if (this.nature === PilotNature.Rookie) {
+            this.fighter.dodgeRate += 5;
+            this.fighter.stamina -= 2;
+        }
+    }
+    serialize() {
+        return {
+            name: this.name,
+            gender: this.gender,
+            nature: this.nature,
+        };
+    }
+    static Deserialize(data, pilot) {
+        /*
+        if (!pilot) {
+            pilot = new Pilot();
+        }
+        */
+        pilot.name = data.name;
+        pilot.gender = data.gender;
+        pilot.nature = data.nature;
+        return pilot;
+    }
+    static RandomData() {
+        let gender = Gender.Male;
+        if (Math.random() > 0.5) {
+            gender = Gender.Female;
+        }
+        let name = "";
+        if (gender === Gender.Male) {
+            name = Pilot._MaleNames[Math.floor(Math.random() * Pilot._MaleNames.length)];
+        }
+        else {
+            name = Pilot._FemaleNames[Math.floor(Math.random() * Pilot._FemaleNames.length)];
+        }
+        let nature;
+        let r = Math.random();
+        if (r < 0.5) {
+            nature = PilotNature.Professional;
+        }
+        else {
+            nature = PilotNature.Cool;
+        }
+        return {
+            name: name,
+            gender: gender,
+            nature: nature
+        };
+    }
+}
+Pilot._MaleNames = [
+    "Abraham",
+    "Bob",
+    "Charly",
+    "Denver",
+    "Eliott",
+    "Frank",
+    "Grant",
+    "Hobarth",
+    "Indiana",
+    "Jack",
+    "Karl",
+    "Leon",
+    "Muhammad",
+    "Neron",
+    "Oscar",
+    "Preston",
+    "Quill",
+    "Rex",
+    "Sven",
+    "Titus",
+    "Ulyss",
+    "Victor",
+    "Walter",
+    "Xavier",
+    "Yan",
+    "Zu"
+];
+Pilot._FemaleNames = [
+    "Alicia",
+    "Beatrix",
+    "Chandra",
+    "Dulcia",
+    "Eliane",
+    "Frida",
+    "Gerda",
+    "Horthense",
+    "Ida",
+    "Julie",
+    "Kat",
+    "Loana",
+    "Marcia",
+    "Nicoletta",
+    "Oualie",
+    "Paulita",
+    "Quinta",
+    "Rose",
+    "Soumeia",
+    "Tatiana",
+    "Ursula",
+    "Vero",
+    "Wachita",
+    "Xendra",
+    "Yaelle",
+    "Zoe"
+];
+class Spaceship {
+    constructor(fighter) {
+        this.fighter = fighter;
+        this.allParts = [];
+    }
+    initialize() {
+        for (let i = 0; i < this.allParts.length; i++) {
+            let spaceshipPart = this.allParts[i];
+            this.fighter.speed += spaceshipPart.speed;
+            this.fighter.stamina += spaceshipPart.stamina;
+            this.fighter.shieldCapacity += spaceshipPart.shieldCapacity;
+            this.fighter.shieldSpeed += spaceshipPart.shieldSpeed;
+            this.fighter.armor += spaceshipPart.armor;
+            this.fighter.moveRange += spaceshipPart.moveRange;
+            this.fighter.attackRange += spaceshipPart.attackRange;
+            this.fighter.attackPower += spaceshipPart.attackPower;
+            this.fighter.accuracy += spaceshipPart.accuracy;
+            this.fighter.staticAttack = this.fighter.staticAttack || spaceshipPart.staticAttack;
+            this.fighter.criticalRate += spaceshipPart.attackRange;
+            this.fighter.dodgeRate += spaceshipPart.dodgeRate;
+        }
+    }
+    serialize() {
+        let data = {
+            body: { reference: this.body.reference },
+            wingL: { reference: this.wingL.reference },
+            wingR: { reference: this.wingR.reference },
+            engine: { reference: this.engine.reference }
+        };
+        if (this.canon) {
+            data.canon = { reference: this.canon.reference };
+        }
+        return data;
+    }
+    static Deserialize(data, spaceship) {
+        /*
+        if (!spaceship) {
+            spaceship = new Spaceship();
+        }
+        */
+        if (data.body) {
+            spaceship.body = SpaceshipPart.Deserialize(data.body);
+            spaceship.allParts.push(spaceship.body);
+        }
+        if (data.wingL) {
+            spaceship.wingL = SpaceshipPart.Deserialize(data.wingL);
+            spaceship.allParts.push(spaceship.wingL);
+        }
+        if (data.wingR) {
+            spaceship.wingR = SpaceshipPart.Deserialize(data.wingR);
+            spaceship.allParts.push(spaceship.wingR);
+        }
+        if (data.canon) {
+            spaceship.canon = SpaceshipPart.Deserialize(data.canon);
+            spaceship.allParts.push(spaceship.canon);
+        }
+        if (data.engine) {
+            spaceship.engine = SpaceshipPart.Deserialize(data.engine);
+            spaceship.allParts.push(spaceship.engine);
+        }
+        return spaceship;
+    }
+    static RandomData() {
+        let wingData = SpaceshipPart.RandomWingData();
+        return {
+            body: SpaceshipPart.RandomBodyData(),
+            wingL: wingData,
+            wingR: wingData,
+            engine: { reference: "engine-1" },
+            canon: { reference: "canon-1" }
+        };
+    }
+}
+class SpaceshipPart {
+    constructor() {
+        this.reference = "undefined";
+        this.name = "Unnamed";
+        this.meshName = "";
+        this.speed = 0;
+        this.stamina = 0;
+        this.shieldCapacity = 0;
+        this.shieldSpeed = 0;
+        this.armor = 0;
+        this.moveRange = 0;
+        this.attackRange = 0;
+        this.attackPower = 0;
+        this.accuracy = 0;
+        this.staticAttack = false;
+        this.criticalRate = 0;
+        this.dodgeRate = 0;
+    }
+    setReference(reference) {
+        this.reference = reference;
+        if (this.reference === "arrow-body") {
+            this.speed += 10;
+            this.name = "Arrow";
+            this.meshName = "body-1";
+        }
+        if (this.reference === "hubble-body") {
+            this.accuracy += 5;
+            this.name = "Hubble";
+            this.meshName = "body-2";
+        }
+        if (this.reference === "moon-body") {
+            this.shieldCapacity += 2;
+            this.shieldSpeed += 1;
+            this.name = "Moon";
+            this.meshName = "body-3";
+        }
+        if (this.reference === "scout-wing") {
+            this.moveRange += 1;
+            this.name = "Scout";
+            this.meshName = "wing-1";
+        }
+        if (this.reference === "arrow-wing") {
+            this.speed += 5;
+            this.name = "Arrow";
+            this.meshName = "wing-2";
+        }
+        if (this.reference === "shield-wing") {
+            this.armor += 1;
+            this.name = "Shield";
+            this.meshName = "wing-3";
+        }
+        if (this.reference === "claw-wing") {
+            this.attackPower += 1;
+            this.name = "Claw";
+            this.meshName = "wing-4";
+        }
+    }
+    serialize() {
+        return {
+            reference: this.reference
+        };
+    }
+    static Deserialize(data, spaceshipPart) {
+        if (!spaceshipPart) {
+            spaceshipPart = new SpaceshipPart();
+        }
+        spaceshipPart.setReference(data.reference);
+        return spaceshipPart;
+    }
+    static RandomBodyData() {
+        return {
+            reference: SpaceshipPart._BodyReferences[Math.floor(Math.random() * SpaceshipPart._BodyReferences.length)]
+        };
+    }
+    static RandomWingData() {
+        return {
+            reference: SpaceshipPart._WingReferences[Math.floor(Math.random() * SpaceshipPart._WingReferences.length)]
+        };
+    }
+}
+SpaceshipPart._BodyReferences = [
+    "arrow-body",
+    "hubble-body",
+    "moon-body"
+];
+SpaceshipPart._WingReferences = [
+    "scout-wing",
+    "arrow-wing",
+    "shield-wing",
+    "claw-wing",
+];
 /// <reference path="../../lib/babylon.d.ts"/>
 /// <reference path="../../lib/babylon.gui.d.ts"/>
 var COS30 = Math.cos(Math.PI / 6);
@@ -3848,14 +3976,14 @@ class Game {
             c.initializeBoard(boardData);
         });
         for (let i = 0; i < 3; i++) {
-            let team0Fighter = new Fighter(0);
+            let team0Fighter = Fighter.CreateRandom(0);
             team0Fighter.initialize();
             let tile = this._board.getTileByIJ(-3, -1 + 2 * i);
             tile.setFighter(team0Fighter);
             this._fighters.push(team0Fighter);
         }
         for (let i = 0; i < 3; i++) {
-            let team1Fighter = new Fighter(1);
+            let team1Fighter = Fighter.CreateRandom(1);
             team1Fighter.initialize();
             let tile = this._board.getTileByIJ(3, -1 + 2 * i);
             tile.setFighter(team1Fighter);

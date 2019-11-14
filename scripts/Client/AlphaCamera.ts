@@ -1,7 +1,7 @@
 class AlphaCamera extends BABYLON.ArcRotateCamera {
 
     public currentTarget: any;
-    public currentRadius: number = 5;
+    public currentRadius: number = 4;
     private _currentTargetPos: BABYLON.Vector3 = BABYLON.Vector3.Zero();
     private _lastDir: number;
 

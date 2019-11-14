@@ -11,17 +11,20 @@ class Projectile extends BABYLON.Mesh {
         this._direction = direction;
         this.shooter = shooter;
         this.shotSpeed = this.shooter.shootSpeed;
-        this.position.copyFrom(shooter.position);
-        this.rotationQuaternion = shooter.rotationQuaternion.clone();
-        this._displacementRay = new BABYLON.Ray(this.position, this._direction.clone());
+        this.position.copyFrom(shooter.absolutePosition);
+        this.rotationQuaternion = BABYLON.Quaternion.FromEulerVector(shooter.rotation);
+        this.scaling.copyFromFloats(0.15, 0.15, 0.15);
+        this._displacementRay = new BABYLON.Ray(this.absolutePosition, this._direction.clone());
         this.getScene().onBeforeRenderObservable.add(this._update);
     }
 
     public async instantiate(): Promise<void> {
-        let vertexData = await VertexDataLoader.instance.get("blaster-trail")[0];
+        let vertexData = await VertexDataLoader.instance.getColorized("blaster-trail");
+        console.log(vertexData);
         if (vertexData && !this.isDisposed()) {
             vertexData.applyToMesh(this);
         }
+        Main.Camera.currentTarget = this;
     }
 
     public destroy(): void {
@@ -33,10 +36,12 @@ class Projectile extends BABYLON.Mesh {
         let dt = this.getEngine().getDeltaTime() / 1000;
         this._lifeSpan -= dt;
         if (this._lifeSpan < 0) {
+            console.log("Destroy projectile (negative lifespan)");
             return this.destroy();
         }
         let hitSpaceship = Math.random() < 0.01;
         if (hitSpaceship) {
+            console.log("Destroy projectile (hit spaceship");
             return this.destroy();
         }
         this.position.addInPlace(this._direction.scale(this.shotSpeed * dt));

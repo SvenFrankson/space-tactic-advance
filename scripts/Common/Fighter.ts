@@ -3,45 +3,36 @@ class IFighterData {
     j?: number;
     id: number;
     team: number;
-    speed: number;
 
-    stamina: number;
-    shieldCapacity: number;
-    shieldSpeed: number;
-    armor: number;
-    
-    moveRange: number;
-    attackRange: number;
-    attackPower: number;
-
-    accuracy: number;
-    staticAttack: boolean;
-    criticalRate: number;
-    dodgeRate: number;
+    pilot: IPilotData;
+    spaceship: ISpaceshipData;
 }
 
 class Fighter {
 
     private static ID: number = 0;
 
+    public spaceship: Spaceship;
+    public pilot: Pilot;
+
     public id: number;
     public team: number;
 
-    public speed: number = 10;
+    public speed: number = 50;
 
     public stamina: number = 10;
-    public shieldCapacity: number = 6;
-    public shieldSpeed: number = 2;
-    public armor: number = 1;
+    public shieldCapacity: number = 5;
+    public shieldSpeed: number = 1;
+    public armor: number = 0;
     
-    public moveRange: number = 6;
+    public moveRange: number = 3;
     public attackRange: number = 1;
-    public attackPower: number = 6;
+    public attackPower: number = 5;
 
     public accuracy: number = 95;
     public staticAttack: boolean = false;
-    public criticalRate: number = 10;
-    public dodgeRate: number = 10;
+    public criticalRate: number = 5;
+    public dodgeRate: number = 5;
 
     public hp: number = 10;
     public shield: number = 5;
@@ -70,7 +61,8 @@ class Fighter {
     }
 
     public initialize(): void {
-        this.speed = Math.floor(Math.random() * 100);
+        this.spaceship.initialize();
+        this.pilot.initialize();
     }
 
     public kill(): void {
@@ -95,20 +87,8 @@ class Fighter {
             id: this.id,
             team: this.team,
 
-            speed: this.speed,
-            stamina: this.stamina,
-            shieldCapacity: this.shieldCapacity,
-            shieldSpeed: this.shieldSpeed,
-            armor: this.armor,
-            
-            moveRange: this.moveRange,
-            attackRange: this.attackRange,
-            attackPower: this.attackPower,
-
-            accuracy: this.accuracy,
-            staticAttack: this.staticAttack,
-            criticalRate: this.criticalRate,
-            dodgeRate: this.dodgeRate
+            pilot: this.pilot.serialize(),
+            spaceship: this.spaceship.serialize()
         };
         if (this._tile) {
             data.i = this._tile.i;
@@ -121,21 +101,21 @@ class Fighter {
         fighter.id = data.id;
         fighter.team = data.team;
 
-        fighter.speed = data.speed;
-        fighter.stamina = data.stamina;
-        fighter.shieldCapacity = data.shieldCapacity;
-        fighter.shieldSpeed = data.shieldSpeed;
-        fighter.armor = data.armor;
-        
-        fighter.moveRange = data.moveRange;
-        fighter.attackRange = data.attackRange;
-        fighter.attackPower = data.attackPower;
-        
-        fighter.accuracy = data.accuracy;
-        fighter.staticAttack = data.staticAttack;
-        fighter.criticalRate = data.criticalRate;
-        fighter.dodgeRate = data.dodgeRate;
+        fighter.pilot = new Pilot(fighter);
+        Pilot.Deserialize(data.pilot, fighter.pilot);
 
+        fighter.spaceship = new Spaceship(fighter);
+        Spaceship.Deserialize(data.spaceship, fighter.spaceship);
+
+        return fighter;
+    }
+
+    public static CreateRandom(team: number): Fighter {
+        let fighter = new Fighter(team);
+        fighter.pilot = new Pilot(fighter);
+        Pilot.Deserialize(Pilot.RandomData(), fighter.pilot);
+        fighter.spaceship = new Spaceship(fighter);
+        Spaceship.Deserialize(Spaceship.RandomData(), fighter.spaceship);
         return fighter;
     }
 }

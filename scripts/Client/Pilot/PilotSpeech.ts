@@ -89,7 +89,7 @@ class PilotSpeech {
             SpeechSituation.Hold,
             [
                 "Holding position, over.",
-                "Stand by."
+                "Standing by."
             ]
         );
         speeches.set(

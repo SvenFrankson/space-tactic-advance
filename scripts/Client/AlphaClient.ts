@@ -59,26 +59,22 @@ class AlphaClient extends Client {
         let container = document.getElementById("fighters-order");
         container.innerHTML = "";
 
-        console.log(this._fighters);
         for (let i = 0; i < this._fighters.length; i++) {
             let fighter = this._fighters[i] as AlphaFighter;
-            console.log("I = " + i);
-            console.log(fighter);
             fighter.updateTurnStatus(-1);
         }
 
-        console.log(this._fighterOrder);
         for (let i = 0; i < this._fighterOrder.length; i++) {
             let fighterId = this._fighterOrder[i];
-            console.log("FighterId = " + fighterId);
             let fighter = this.getFighterByID(fighterId) as AlphaFighter;
             fighter.updateTurnStatus(i);
 
             let dElement = document.createElement("div");
             dElement.classList.add("fighter-order-element");
+            dElement.style.color = "white";
 
             let idElement = document.createElement("div");
-            idElement.textContent = "ID = " + fighter.id;
+            idElement.textContent = fighter.pilot.name + " #" + fighter.id;
             dElement.appendChild(idElement);
 
             let speedElement = document.createElement("div");
@@ -165,8 +161,28 @@ class AlphaClient extends Client {
 
 
     protected onFighterHasAttacked(fighter: Fighter, target: Fighter, result: number): void {
-        if (fighter instanceof AlphaFighter) {
+        if (fighter instanceof AlphaFighter && target instanceof AlphaFighter) {
             fighter.showText(SpeechSituation.Attack);
+
+            let aimAnimation = () => {
+                let dir = BABYLON.Vector3.TransformNormal(BABYLON.Axis.Z, fighter.fighterMesh.getWorldMatrix());
+                dir.normalize();
+                let targetDir2D = new BABYLON.Vector2(target.transformMesh.position.x, target.transformMesh.position.z);
+                targetDir2D.x -= fighter.transformMesh.position.x;
+                targetDir2D.y -= fighter.transformMesh.position.z;
+                let a = Math2D.AngleFromTo(targetDir2D, new BABYLON.Vector2(0, 1), false);
+                if (!Math2D.AreEqualsCircular(a, fighter.fighterMesh.rotation.y, Math.PI / 120)) {
+                    let dA = Math2D.StepFromToCirular(fighter.fighterMesh.rotation.y, a, Math.PI / 120);
+                    fighter.fighterMesh.rotation.y = dA;
+                    requestAnimationFrame(aimAnimation);
+                }
+                else {
+                    console.log("Shoot !");
+                    fighter.fighterMesh.rotation.y = a;
+                    fighter.shoot(target.transformMesh.position);
+                }
+            }
+            aimAnimation();
             setTimeout(
                 () => {
                     if (result === 0) {

@@ -4,18 +4,18 @@ Exporter version: 5.4.2, Blender version: 2.78 (sub 0)
 		selected layers only:  true
 		flat shading entire scene:  false
 		inline textures:  false
-		texture directory:  C:\Users\Sven\Documents\SvenFrankson\space-scout\datas\models\
+		texture directory:  C:\Users\Sven\Documents\SvenFrankson\space-scout\datas\vertexData\
 	Python World class constructor completed
 	WARNING: No active camera has been assigned, or is not in a currently selected Blender layer
 	processing begun of mesh:  canon-1
-		processing begun of Standard material:  Material.001
-		num positions      :  256
-		num normals        :  256
-		num uvs            :  512
+		WARNING: No materials have been assigned: 
+		num positions      :  72
+		num normals        :  72
+		num uvs            :  0
 		num uvs2           :  0
-		num colors         :  0
+		num colors         :  288
 		num indices        :  312
 ========= Writing of scene file started =========
 ========= Writing of scene file completed =========
 ========= end of processing =========
-elapsed time:  0 min, 0.0705 secs
+elapsed time:  0 min, 0.046 secs

@@ -56,7 +56,7 @@ class AlphaFighter extends Fighter {
     private static ActionPanel: ActionPanel;
 
     public transformMesh: BABYLON.Mesh;
-    public fighterMesh: BABYLON.Mesh;
+    public fighterMesh: SpaceShip;
     private _turnStatusMesh: BABYLON.Mesh;
     private _teamIndicatorMesh: BABYLON.Mesh;
     private _hpLeftMesh: BABYLON.Mesh;
@@ -92,15 +92,15 @@ class AlphaFighter extends Fighter {
             this.transformMesh = new BABYLON.Mesh("fighter-" + this.id);
         }
         if (!this.fighterMesh) {
-            let spaceship = new SpaceShip();
-            spaceship.name = "Demo";
-            spaceship.initialize({
+            this.fighterMesh = new SpaceShip();
+            this.fighterMesh.name = "Demo";
+            this.fighterMesh.initialize({
                 type: "root",
-                name: "body-1",
+                name: this.spaceship.body.meshName,
                 children: [
                     {
                         type: "wingL",
-                        name: "wing-1",
+                        name: this.spaceship.wingL.meshName,
                         children: [
                             {
                                 type: "weapon",
@@ -110,7 +110,7 @@ class AlphaFighter extends Fighter {
                     },
                     {
                         type: "wingR",
-                        name: "wing-1",
+                        name: this.spaceship.wingR.meshName,
                         children: [
                             {
                                 type: "weapon",
@@ -123,7 +123,6 @@ class AlphaFighter extends Fighter {
                 "#ffdddd",
                 "#ddbbbb"
             );
-            this.fighterMesh = spaceship;
             this.fighterMesh.scaling.copyFromFloats(0.15, 0.15, 0.15);
             this.fighterMesh.parent = this.transformMesh;
             this.fighterMesh.position.y = 0.25;
@@ -421,5 +420,10 @@ class AlphaFighter extends Fighter {
             },
             3000
         );
+    }
+
+    public shoot(target: BABYLON.Vector3): void {
+        let dir = target.subtract(this.transformMesh.position).normalize();
+        this.fighterMesh.shoot(dir);
     }
 }

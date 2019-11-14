@@ -52,6 +52,7 @@ class Client implements IClient {
             if (tile) {
                 tile.setFighter(fighter);
             }
+            fighter.initialize();
             this._fighters.push(fighter);
             fightersAdded.push(fighter);
         }

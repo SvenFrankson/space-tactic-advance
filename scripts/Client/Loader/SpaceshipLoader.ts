@@ -1,20 +1,3 @@
-interface ISpaceshipData {
-    model: SpaceShipElement;
-    stamina: number;
-    enginePower: number;
-    rollPower: number;
-    yawPower: number;
-    pitchPower: number;
-    frontDrag: number;
-    backDrag: number;
-    rollDrag: number;
-    yawDrag: number;
-    pitchDrag: number;
-    shootPower: number;
-    shootCooldown: number;
-    shootSpeed: number;
-}
-
 class SpaceshipLoader {
 
     public static instance: SpaceshipLoader;
