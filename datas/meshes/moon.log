@@ -1,0 +1,77 @@
+Exporter version: 6.2.0, Blender version: 2.80 (sub 75)
+========= Conversion from Blender to Babylon.js =========
+	Scene settings used :
+		inline textures     :  false
+		Material Type       :  PBR
+		Positions Precision :  4
+		Normals Precision   :  3
+		UVs Precision       :  3
+		Vert Color Precision:  3
+		Mat Weight Precision:  2
+		texture directory   :  C:\Users\svent\Documents\SvenFrankson\space-tactic-advance\datas\meshes\
+	Python World class constructor completed
+	WARNING: No active camera has been assigned, or is not in a currently selected Blender layer
+	processing begun of mesh:  body-color-1
+		processing begun of material:  Color 1
+		num positions      :  146
+		num normals        :  146
+		num tangents       :  0
+		num uvs            :  0
+		num uvs2           :  0
+		num colors         :  584
+		num indices        :  720
+	processing begun of mesh:  body-color-3
+		processing begun of material:  Color 3
+		num positions      :  24
+		num normals        :  24
+		num tangents       :  0
+		num uvs            :  0
+		num uvs2           :  0
+		num colors         :  96
+		num indices        :  78
+	processing begun of mesh:  body-base-dark
+		processing begun of material:  Base Dark
+		num positions      :  16
+		num normals        :  16
+		num tangents       :  0
+		num uvs            :  0
+		num uvs2           :  0
+		num colors         :  64
+		num indices        :  42
+	processing begun of mesh:  body-base
+		processing begun of material:  Base
+		num positions      :  74
+		num normals        :  74
+		num tangents       :  0
+		num uvs            :  0
+		num uvs2           :  0
+		num colors         :  296
+		num indices        :  387
+	processing begun of mesh:  body-frame
+		processing begun of material:  Dark
+		num positions      :  210
+		num normals        :  210
+		num tangents       :  0
+		num uvs            :  0
+		num uvs2           :  0
+		num colors         :  840
+		num indices        :  990
+	processing begun of mesh:  body-color-2
+		processing begun of material:  Color 2
+		num positions      :  64
+		num normals        :  64
+		num tangents       :  0
+		num uvs            :  0
+		num uvs2           :  0
+		num colors         :  256
+		num indices        :  288
+========= Writing of JSON file started =========
+	writing mesh:  body-color-1
+	writing mesh:  body-color-3
+	writing mesh:  body-base-dark
+	writing mesh:  body-base
+	writing mesh:  body-frame
+	writing mesh:  body-color-2
+========= Writing of JSON file completed =========
+========= end of processing =========
+elapsed time:  0 min, 0.1771 secs

@@ -96,15 +96,15 @@ class AlphaFighter extends Fighter {
             this.fighterMesh.name = "Demo";
             this.fighterMesh.initialize({
                 type: "root",
-                name: "arrow-body",
+                name: this.spaceship.body.reference,
                 children: [
                     {
                         type: "wingL",
-                        name: "arrow-wing"
+                        name: this.spaceship.wingL.reference
                     },
                     {
                         type: "wingR",
-                        name: "arrow-wing"
+                        name: this.spaceship.wingR.reference
                     }
                 ]
             },

@@ -49,7 +49,7 @@ class SpaceShipFactory {
 		baseColor: string,
 		detailColor: string
 	): Promise<BABYLON.Mesh> {
-		let data = await SpaceshipVertexDataLoader.instance.getSpaceshipPartVertexData(spaceshipName, partName, baseColor, detailColor, "#ff0000", "#00ff00", "#0000ff");
+		let data = await SpaceshipVertexDataLoader.instance.getSpaceshipPartVertexData(spaceshipName, partName, baseColor, detailColor, "#d65915", "#5cd914", "#13c5cf");
 		let m = new BABYLON.Mesh(spaceshipName + " " + partName, Main.Scene);
 		m.layerMask = 1;
 		data.applyToMesh(m);

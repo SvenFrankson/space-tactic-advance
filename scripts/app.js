@@ -912,15 +912,15 @@ class AlphaFighter extends Fighter {
             this.fighterMesh.name = "Demo";
             this.fighterMesh.initialize({
                 type: "root",
-                name: "arrow-body",
+                name: this.spaceship.body.reference,
                 children: [
                     {
                         type: "wingL",
-                        name: "arrow-wing"
+                        name: this.spaceship.wingL.reference
                     },
                     {
                         type: "wingR",
-                        name: "arrow-wing"
+                        name: this.spaceship.wingR.reference
                     }
                 ]
             }, "#ffffff", "#505050");
@@ -2693,7 +2693,7 @@ class SpaceShipFactory {
         return "#00ff00";
     }
     static async LoadSpaceshipPart(spaceshipName, partName, baseColor, detailColor) {
-        let data = await SpaceshipVertexDataLoader.instance.getSpaceshipPartVertexData(spaceshipName, partName, baseColor, detailColor, "#ff0000", "#00ff00", "#0000ff");
+        let data = await SpaceshipVertexDataLoader.instance.getSpaceshipPartVertexData(spaceshipName, partName, baseColor, detailColor, "#d65915", "#5cd914", "#13c5cf");
         let m = new BABYLON.Mesh(spaceshipName + " " + partName, Main.Scene);
         m.layerMask = 1;
         data.applyToMesh(m);

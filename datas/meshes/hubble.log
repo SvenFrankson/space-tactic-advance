@@ -1,0 +1,112 @@
+Exporter version: 6.2.0, Blender version: 2.80 (sub 75)
+========= Conversion from Blender to Babylon.js =========
+	Scene settings used :
+		inline textures     :  false
+		Material Type       :  PBR
+		Positions Precision :  4
+		Normals Precision   :  3
+		UVs Precision       :  3
+		Vert Color Precision:  3
+		Mat Weight Precision:  2
+		texture directory   :  C:\Users\svent\Documents\SvenFrankson\space-tactic-advance\datas\meshes\
+	Python World class constructor completed
+	WARNING: No active camera has been assigned, or is not in a currently selected Blender layer
+	processing begun of mesh:  body-base-dark
+		processing begun of material:  Frame
+		processing begun of material:  Base Dark
+		processing begun of material:  Color 3
+		processing begun of material:  Base
+		processing begun of material:  Color 1
+		processing begun of multimaterial:  hubble.Multimaterial#0
+		num positions      :  48
+		num normals        :  48
+		num tangents       :  0
+		num uvs            :  0
+		num uvs2           :  0
+		num colors         :  192
+		num indices        :  138
+	processing begun of mesh:  body-color-3
+		processing begun of material:  Frame
+		processing begun of material:  Base Dark
+		processing begun of material:  Color 3
+		processing begun of material:  Base
+		processing begun of material:  Color 1
+		registered as also a user of material:  Frame
+		registered as also a user of material:  Base Dark
+		registered as also a user of material:  Color 3
+		registered as also a user of material:  Base
+		registered as also a user of material:  Color 1
+		processing begun of multimaterial:  hubble.Multimaterial#1
+		num positions      :  41
+		num normals        :  41
+		num tangents       :  0
+		num uvs            :  0
+		num uvs2           :  0
+		num colors         :  164
+		num indices        :  210
+	processing begun of mesh:  body-frame
+		processing begun of material:  Frame
+		processing begun of material:  Base Dark
+		processing begun of material:  Color 3
+		processing begun of material:  Base
+		processing begun of material:  Color 1
+		registered as also a user of material:  Frame
+		registered as also a user of material:  Base Dark
+		registered as also a user of material:  Color 3
+		registered as also a user of material:  Base
+		registered as also a user of material:  Color 1
+		processing begun of multimaterial:  hubble.Multimaterial#2
+		num positions      :  388
+		num normals        :  388
+		num tangents       :  0
+		num uvs            :  0
+		num uvs2           :  0
+		num colors         :  1552
+		num indices        :  1848
+	processing begun of mesh:  body-color-1
+		processing begun of material:  Frame
+		processing begun of material:  Base Dark
+		processing begun of material:  Color 3
+		processing begun of material:  Base
+		processing begun of material:  Color 1
+		registered as also a user of material:  Frame
+		registered as also a user of material:  Base Dark
+		registered as also a user of material:  Color 3
+		registered as also a user of material:  Base
+		registered as also a user of material:  Color 1
+		processing begun of multimaterial:  hubble.Multimaterial#3
+		num positions      :  198
+		num normals        :  198
+		num tangents       :  0
+		num uvs            :  0
+		num uvs2           :  0
+		num colors         :  792
+		num indices        :  996
+	processing begun of mesh:  body-base
+		processing begun of material:  Frame
+		processing begun of material:  Base Dark
+		processing begun of material:  Color 3
+		processing begun of material:  Base
+		processing begun of material:  Color 1
+		registered as also a user of material:  Frame
+		registered as also a user of material:  Base Dark
+		registered as also a user of material:  Color 3
+		registered as also a user of material:  Base
+		registered as also a user of material:  Color 1
+		processing begun of multimaterial:  hubble.Multimaterial#4
+		num positions      :  167
+		num normals        :  167
+		num tangents       :  0
+		num uvs            :  0
+		num uvs2           :  0
+		num colors         :  0
+		num indices        :  870
+========= Writing of JSON file started =========
+	writing mesh:  body-base-dark
+	writing mesh:  body-color-3
+	writing mesh:  body-frame
+	writing mesh:  body-color-1
+	writing mesh:  body-base
+========= Writing of JSON file completed =========
+========= end of processing =========
+elapsed time:  0 min, 0.2053 secs
