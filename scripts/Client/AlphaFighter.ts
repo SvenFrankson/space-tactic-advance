@@ -96,32 +96,20 @@ class AlphaFighter extends Fighter {
             this.fighterMesh.name = "Demo";
             this.fighterMesh.initialize({
                 type: "root",
-                name: this.spaceship.body.meshName,
+                name: "arrow-body",
                 children: [
                     {
                         type: "wingL",
-                        name: this.spaceship.wingL.meshName,
-                        children: [
-                            {
-                                type: "weapon",
-                                name: "canon-1"
-                            }
-                        ]
+                        name: "arrow-wing"
                     },
                     {
                         type: "wingR",
-                        name: this.spaceship.wingR.meshName,
-                        children: [
-                            {
-                                type: "weapon",
-                                name: "canon-1"
-                            }
-                        ]
+                        name: "arrow-wing"
                     }
                 ]
             },
-                "#ffdddd",
-                "#ddbbbb"
+                "#ffffff",
+                "#505050"
             );
             this.fighterMesh.scaling.copyFromFloats(0.15, 0.15, 0.15);
             this.fighterMesh.parent = this.transformMesh;

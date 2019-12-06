@@ -1,153 +1,3 @@
-class VertexDataLoader {
-    constructor(scene) {
-        this.scene = scene;
-        this._vertexDatas = new Map();
-        VertexDataLoader.instance = this;
-    }
-    static clone(data) {
-        let clonedData = new BABYLON.VertexData();
-        clonedData.positions = [...data.positions];
-        clonedData.indices = [...data.indices];
-        clonedData.normals = [...data.normals];
-        if (data.matricesIndices) {
-            clonedData.matricesIndices = [...data.matricesIndices];
-        }
-        if (data.matricesWeights) {
-            clonedData.matricesWeights = [...data.matricesWeights];
-        }
-        if (data.uvs) {
-            clonedData.uvs = [...data.uvs];
-        }
-        if (data.colors) {
-            clonedData.colors = [...data.colors];
-        }
-        return clonedData;
-    }
-    async get(name) {
-        if (this._vertexDatas.get(name)) {
-            return this._vertexDatas.get(name);
-        }
-        let vertexData = undefined;
-        let loadedFile = await BABYLON.SceneLoader.ImportMeshAsync("", "./datas/meshes/" + name + ".babylon", "", Main.Scene);
-        let vertexDatas = new Map();
-        loadedFile.meshes = loadedFile.meshes.sort((m1, m2) => {
-            if (m1.name < m2.name) {
-                return -1;
-            }
-            else if (m1.name > m2.name) {
-                return 1;
-            }
-            return 0;
-        });
-        for (let i = 0; i < loadedFile.meshes.length; i++) {
-            let loadedMesh = loadedFile.meshes[i];
-            if (loadedMesh instanceof BABYLON.Mesh) {
-                vertexData = BABYLON.VertexData.ExtractFromMesh(loadedMesh);
-                vertexDatas.set(loadedMesh.name, vertexData);
-            }
-        }
-        loadedFile.meshes.forEach(m => { m.dispose(); });
-        loadedFile.skeletons.forEach(s => { s.dispose(); });
-        return vertexDatas;
-    }
-    async getColorized(name, baseColorHex = "#FFFFFF", frameColorHex = "", color1Hex = "", // Replace red
-    color2Hex = "", // Replace green
-    color3Hex = "" // Replace blue
-    ) {
-        let vertexDatas = await this.getColorizedMultiple(name, baseColorHex, frameColorHex, color1Hex, color2Hex, color3Hex);
-        console.log(vertexDatas);
-        return vertexDatas.values().next().value;
-    }
-    async getColorizedMultiple(name, baseColorHex = "#FFFFFF", frameColorHex = "", color1Hex = "", // Replace red
-    color2Hex = "", // Replace green
-    color3Hex = "" // Replace blue
-    ) {
-        let baseColor;
-        if (baseColorHex !== "") {
-            baseColor = BABYLON.Color3.FromHexString(baseColorHex);
-        }
-        let frameColor;
-        if (frameColorHex !== "") {
-            frameColor = BABYLON.Color3.FromHexString(frameColorHex);
-        }
-        let color1;
-        if (color1Hex !== "") {
-            color1 = BABYLON.Color3.FromHexString(color1Hex);
-        }
-        let color2;
-        if (color2Hex !== "") {
-            color2 = BABYLON.Color3.FromHexString(color2Hex);
-        }
-        let color3;
-        if (color3Hex !== "") {
-            color3 = BABYLON.Color3.FromHexString(color3Hex);
-        }
-        let vertexDatas = await VertexDataLoader.instance.get(name);
-        let colorizedVertexDatas = new Map();
-        vertexDatas.forEach((vertexData, name) => {
-            let colorizedVertexData = VertexDataLoader.clone(vertexData);
-            if (colorizedVertexData.colors) {
-                for (let i = 0; i < colorizedVertexData.colors.length / 4; i++) {
-                    let r = colorizedVertexData.colors[4 * i];
-                    let g = colorizedVertexData.colors[4 * i + 1];
-                    let b = colorizedVertexData.colors[4 * i + 2];
-                    if (baseColor) {
-                        if (r === 1 && g === 1 && b === 1) {
-                            colorizedVertexData.colors[4 * i] = baseColor.r;
-                            colorizedVertexData.colors[4 * i + 1] = baseColor.g;
-                            colorizedVertexData.colors[4 * i + 2] = baseColor.b;
-                            continue;
-                        }
-                    }
-                    if (frameColor) {
-                        if (r === 0.502 && g === 0.502 && b === 0.502) {
-                            colorizedVertexData.colors[4 * i] = frameColor.r;
-                            colorizedVertexData.colors[4 * i + 1] = frameColor.g;
-                            colorizedVertexData.colors[4 * i + 2] = frameColor.b;
-                            continue;
-                        }
-                    }
-                    if (color1) {
-                        if (r === 1 && g === 0 && b === 0) {
-                            colorizedVertexData.colors[4 * i] = color1.r;
-                            colorizedVertexData.colors[4 * i + 1] = color1.g;
-                            colorizedVertexData.colors[4 * i + 2] = color1.b;
-                            continue;
-                        }
-                    }
-                    if (color2) {
-                        if (r === 0 && g === 1 && b === 0) {
-                            colorizedVertexData.colors[4 * i] = color2.r;
-                            colorizedVertexData.colors[4 * i + 1] = color2.g;
-                            colorizedVertexData.colors[4 * i + 2] = color2.b;
-                            continue;
-                        }
-                    }
-                    if (color3) {
-                        if (r === 0 && g === 0 && b === 1) {
-                            colorizedVertexData.colors[4 * i] = color3.r;
-                            colorizedVertexData.colors[4 * i + 1] = color3.g;
-                            colorizedVertexData.colors[4 * i + 2] = color3.b;
-                            continue;
-                        }
-                    }
-                }
-            }
-            else {
-                let colors = [];
-                for (let i = 0; i < colorizedVertexData.positions.length / 3; i++) {
-                    colors[4 * i] = baseColor.r;
-                    colors[4 * i + 1] = baseColor.g;
-                    colors[4 * i + 2] = baseColor.b;
-                    colors[4 * i + 3] = 1;
-                }
-                colorizedVertexData.colors = colors;
-            }
-            colorizedVertexDatas.set(name, colorizedVertexData);
-        });
-        return colorizedVertexDatas;
-    }
-}
 class IBoardData {
 }
 class Board {
@@ -1062,30 +912,18 @@ class AlphaFighter extends Fighter {
             this.fighterMesh.name = "Demo";
             this.fighterMesh.initialize({
                 type: "root",
-                name: this.spaceship.body.meshName,
+                name: "arrow-body",
                 children: [
                     {
                         type: "wingL",
-                        name: this.spaceship.wingL.meshName,
-                        children: [
-                            {
-                                type: "weapon",
-                                name: "canon-1"
-                            }
-                        ]
+                        name: "arrow-wing"
                     },
                     {
                         type: "wingR",
-                        name: this.spaceship.wingR.meshName,
-                        children: [
-                            {
-                                type: "weapon",
-                                name: "canon-1"
-                            }
-                        ]
+                        name: "arrow-wing"
                     }
                 ]
-            }, "#ffdddd", "#ddbbbb");
+            }, "#ffffff", "#505050");
             this.fighterMesh.scaling.copyFromFloats(0.15, 0.15, 0.15);
             this.fighterMesh.parent = this.transformMesh;
             this.fighterMesh.position.y = 0.25;
@@ -1821,28 +1659,253 @@ class MeshLoader {
         }
     }
 }
-class SpaceshipLoader {
+class SpaceshipVertexDataLoader {
     constructor(scene) {
         this.scene = scene;
-        this._spaceshipDatas = new Map();
-        SpaceshipLoader.instance = this;
+        this._vertexDatas = new Map();
+        SpaceshipVertexDataLoader.instance = this;
+    }
+    async getSpaceshipPartVertexData(spaceshipName, partName, baseColor, frameColor, color1, color2, color3) {
+        let vertexDatas = await this._getSpaceshipPartVertexDatas(spaceshipName, partName);
+        let positions = [];
+        let indices = [];
+        let normals = [];
+        let colors = [];
+        if (!vertexDatas) {
+            console.log(this._vertexDatas);
+            debugger;
+        }
+        vertexDatas.forEach((colorVertexData, colorName) => {
+            let r = 1;
+            let g = 1;
+            let b = 1;
+            let checkColor = (checkedColorName, associatedColor) => {
+                if (colorName === checkedColorName) {
+                    if (associatedColor instanceof BABYLON.Color3) {
+                        r = associatedColor.r;
+                        g = associatedColor.g;
+                        b = associatedColor.b;
+                    }
+                    else if (typeof (associatedColor) === "string") {
+                        let color = BABYLON.Color3.FromHexString(associatedColor);
+                        r = color.r;
+                        g = color.g;
+                        b = color.b;
+                    }
+                }
+            };
+            checkColor("base", baseColor);
+            checkColor("base-dark", baseColor);
+            checkColor("frame", frameColor);
+            checkColor("color-1", color1);
+            checkColor("color-2", color2);
+            checkColor("color-3", color3);
+            let l = positions.length / 3;
+            positions.push(...colorVertexData.positions);
+            normals.push(...colorVertexData.normals);
+            for (let i = 0; i < colorVertexData.positions.length / 3; i++) {
+                colors.push(r, g, b, 1);
+            }
+            for (let i = 0; i < colorVertexData.indices.length; i++) {
+                indices.push(colorVertexData.indices[i] + l);
+            }
+        });
+        let vertexData = new BABYLON.VertexData();
+        vertexData.positions = positions;
+        vertexData.normals = normals;
+        vertexData.indices = indices;
+        vertexData.colors = colors;
+        return vertexData;
+    }
+    async _getSpaceshipPartVertexDatas(spaceshipName, partName) {
+        let spaceshipParts = await this._getSpaceshipParts(spaceshipName);
+        if (spaceshipParts) {
+            return spaceshipParts.get(partName);
+        }
+    }
+    async _getSpaceshipParts(spaceshipName) {
+        let spaceshipParts = this._vertexDatas.get(spaceshipName);
+        if (spaceshipParts) {
+            return spaceshipParts;
+        }
+        spaceshipParts = new Map();
+        let loadedFile = await BABYLON.SceneLoader.ImportMeshAsync("", "./datas/meshes/" + spaceshipName + ".babylon", "", Main.Scene);
+        loadedFile.meshes = loadedFile.meshes.sort((m1, m2) => {
+            if (m1.name < m2.name) {
+                return -1;
+            }
+            else if (m1.name > m2.name) {
+                return 1;
+            }
+            return 0;
+        });
+        for (let i = 0; i < loadedFile.meshes.length; i++) {
+            let loadedMesh = loadedFile.meshes[i];
+            if (loadedMesh instanceof BABYLON.Mesh) {
+                let partName = loadedMesh.name.split("-")[0];
+                let colorName = loadedMesh.name.substr(partName.length + 1);
+                let partVertexDatas = spaceshipParts.get(partName);
+                if (!partVertexDatas) {
+                    partVertexDatas = new Map();
+                    spaceshipParts.set(partName, partVertexDatas);
+                }
+                let vertexData = BABYLON.VertexData.ExtractFromMesh(loadedMesh);
+                partVertexDatas.set(colorName, vertexData);
+                loadedMesh.dispose();
+            }
+        }
+        this._vertexDatas.set(spaceshipName, spaceshipParts);
+        return spaceshipParts;
+    }
+}
+class VertexDataLoader {
+    constructor(scene) {
+        this.scene = scene;
+        this._vertexDatas = new Map();
+        VertexDataLoader.instance = this;
+    }
+    static clone(data) {
+        let clonedData = new BABYLON.VertexData();
+        clonedData.positions = [...data.positions];
+        clonedData.indices = [...data.indices];
+        clonedData.normals = [...data.normals];
+        if (data.matricesIndices) {
+            clonedData.matricesIndices = [...data.matricesIndices];
+        }
+        if (data.matricesWeights) {
+            clonedData.matricesWeights = [...data.matricesWeights];
+        }
+        if (data.uvs) {
+            clonedData.uvs = [...data.uvs];
+        }
+        if (data.colors) {
+            clonedData.colors = [...data.colors];
+        }
+        return clonedData;
     }
     async get(name) {
-        if (this._spaceshipDatas.get(name)) {
-            return this._spaceshipDatas.get(name);
+        if (this._vertexDatas.get(name)) {
+            return this._vertexDatas.get(name);
         }
-        return new Promise((resolve) => {
-            /*
-            $.getJSON(
-                "./datas/spaceships/" + name + ".json",
-                (data: ISpaceshipData) => {
-                    this._spaceshipDatas.set(name, data);
-                    resolve(this._spaceshipDatas.get(name));
-                }
-            )
-            */
-            resolve(undefined);
+        let vertexData = undefined;
+        let loadedFile = await BABYLON.SceneLoader.ImportMeshAsync("", "./datas/meshes/" + name + ".babylon", "", Main.Scene);
+        let vertexDatas = new Map();
+        loadedFile.meshes = loadedFile.meshes.sort((m1, m2) => {
+            if (m1.name < m2.name) {
+                return -1;
+            }
+            else if (m1.name > m2.name) {
+                return 1;
+            }
+            return 0;
         });
+        for (let i = 0; i < loadedFile.meshes.length; i++) {
+            let loadedMesh = loadedFile.meshes[i];
+            if (loadedMesh instanceof BABYLON.Mesh) {
+                vertexData = BABYLON.VertexData.ExtractFromMesh(loadedMesh);
+                vertexDatas.set(loadedMesh.name, vertexData);
+            }
+        }
+        loadedFile.meshes.forEach(m => { m.dispose(); });
+        loadedFile.skeletons.forEach(s => { s.dispose(); });
+        return vertexDatas;
+    }
+    async getColorized(name, baseColorHex = "#FFFFFF", frameColorHex = "", color1Hex = "", // Replace red
+    color2Hex = "", // Replace green
+    color3Hex = "" // Replace blue
+    ) {
+        let vertexDatas = await this.getColorizedMultiple(name, baseColorHex, frameColorHex, color1Hex, color2Hex, color3Hex);
+        console.log(vertexDatas);
+        return vertexDatas.values().next().value;
+    }
+    async getColorizedMultiple(name, baseColorHex = "#FFFFFF", frameColorHex = "", color1Hex = "", // Replace red
+    color2Hex = "", // Replace green
+    color3Hex = "" // Replace blue
+    ) {
+        let baseColor;
+        if (baseColorHex !== "") {
+            baseColor = BABYLON.Color3.FromHexString(baseColorHex);
+        }
+        let frameColor;
+        if (frameColorHex !== "") {
+            frameColor = BABYLON.Color3.FromHexString(frameColorHex);
+        }
+        let color1;
+        if (color1Hex !== "") {
+            color1 = BABYLON.Color3.FromHexString(color1Hex);
+        }
+        let color2;
+        if (color2Hex !== "") {
+            color2 = BABYLON.Color3.FromHexString(color2Hex);
+        }
+        let color3;
+        if (color3Hex !== "") {
+            color3 = BABYLON.Color3.FromHexString(color3Hex);
+        }
+        let vertexDatas = await VertexDataLoader.instance.get(name);
+        let colorizedVertexDatas = new Map();
+        vertexDatas.forEach((vertexData, name) => {
+            let colorizedVertexData = VertexDataLoader.clone(vertexData);
+            if (colorizedVertexData.colors) {
+                for (let i = 0; i < colorizedVertexData.colors.length / 4; i++) {
+                    let r = colorizedVertexData.colors[4 * i];
+                    let g = colorizedVertexData.colors[4 * i + 1];
+                    let b = colorizedVertexData.colors[4 * i + 2];
+                    if (baseColor) {
+                        if (r === 1 && g === 1 && b === 1) {
+                            colorizedVertexData.colors[4 * i] = baseColor.r;
+                            colorizedVertexData.colors[4 * i + 1] = baseColor.g;
+                            colorizedVertexData.colors[4 * i + 2] = baseColor.b;
+                            continue;
+                        }
+                    }
+                    if (frameColor) {
+                        if (r === 0.502 && g === 0.502 && b === 0.502) {
+                            colorizedVertexData.colors[4 * i] = frameColor.r;
+                            colorizedVertexData.colors[4 * i + 1] = frameColor.g;
+                            colorizedVertexData.colors[4 * i + 2] = frameColor.b;
+                            continue;
+                        }
+                    }
+                    if (color1) {
+                        if (r === 1 && g === 0 && b === 0) {
+                            colorizedVertexData.colors[4 * i] = color1.r;
+                            colorizedVertexData.colors[4 * i + 1] = color1.g;
+                            colorizedVertexData.colors[4 * i + 2] = color1.b;
+                            continue;
+                        }
+                    }
+                    if (color2) {
+                        if (r === 0 && g === 1 && b === 0) {
+                            colorizedVertexData.colors[4 * i] = color2.r;
+                            colorizedVertexData.colors[4 * i + 1] = color2.g;
+                            colorizedVertexData.colors[4 * i + 2] = color2.b;
+                            continue;
+                        }
+                    }
+                    if (color3) {
+                        if (r === 0 && g === 0 && b === 1) {
+                            colorizedVertexData.colors[4 * i] = color3.r;
+                            colorizedVertexData.colors[4 * i + 1] = color3.g;
+                            colorizedVertexData.colors[4 * i + 2] = color3.b;
+                            continue;
+                        }
+                    }
+                }
+            }
+            else {
+                let colors = [];
+                for (let i = 0; i < colorizedVertexData.positions.length / 3; i++) {
+                    colors[4 * i] = baseColor.r;
+                    colors[4 * i + 1] = baseColor.g;
+                    colors[4 * i + 2] = baseColor.b;
+                    colors[4 * i + 3] = 1;
+                }
+                colorizedVertexData.colors = colors;
+            }
+            colorizedVertexDatas.set(name, colorizedVertexData);
+        });
+        return colorizedVertexDatas;
     }
 }
 var SpeechSituation;
@@ -2531,7 +2594,7 @@ class SpaceShip extends BABYLON.Mesh {
         return this.mesh;
     }
     static async _InitializeRecursively(elementData, baseColor, detailColor, spaceship, meshes) {
-        let e = await SpaceShipFactory.LoadSpaceshipPart(elementData.name, Main.Scene, baseColor, detailColor);
+        let e = await SpaceShipFactory.LoadSpaceshipPart(elementData.name.split("-")[0], elementData.name.split("-")[1], baseColor, detailColor);
         if (meshes) {
             meshes.push(e);
         }
@@ -2629,9 +2692,9 @@ class SpaceShipFactory {
         }
         return "#00ff00";
     }
-    static async LoadSpaceshipPart(part, scene, baseColor, detailColor) {
-        let data = await VertexDataLoader.instance.getColorized(part, baseColor, detailColor, "#ff0000", "#00ff00", "#0000ff");
-        let m = new BABYLON.Mesh(part, Main.Scene);
+    static async LoadSpaceshipPart(spaceshipName, partName, baseColor, detailColor) {
+        let data = await SpaceshipVertexDataLoader.instance.getSpaceshipPartVertexData(spaceshipName, partName, baseColor, detailColor, "#ff0000", "#00ff00", "#0000ff");
+        let m = new BABYLON.Mesh(spaceshipName + " " + partName, Main.Scene);
         m.layerMask = 1;
         data.applyToMesh(m);
         m.material = SpaceShipFactory.cellShadingMaterial;
@@ -2655,7 +2718,7 @@ class SpaceShipSlots {
     }
     constructor() {
         this._slots = new Map();
-        this._slots.set("body-1", [
+        this._slots.set("arrow-body", [
             new SpaceShipSlot("engine", new BABYLON.Vector3(0, 0, -1), new BABYLON.Vector3(0, 0, 0)),
             new SpaceShipSlot("wingL", new BABYLON.Vector3(-0.55, 0, -0.4), new BABYLON.Vector3(0, 0, 0)),
             new SpaceShipSlot("wingR", new BABYLON.Vector3(0.55, 0, -0.4), new BABYLON.Vector3(0, 0, 0), true),
@@ -3403,6 +3466,7 @@ class Main {
         skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
         skybox.material = skyboxMaterial;
         new VertexDataLoader(Main.Scene);
+        new SpaceshipVertexDataLoader(Main.Scene);
         let game = new Game();
         let player0 = new AlphaClient(0);
         let player1 = new StupidClient(1);

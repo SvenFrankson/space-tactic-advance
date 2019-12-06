@@ -188,6 +188,7 @@ class Main {
 		skybox.material = skyboxMaterial;
 
 		new VertexDataLoader(Main.Scene);
+		new SpaceshipVertexDataLoader(Main.Scene);
 
 		let game = new Game();
 		let player0 = new AlphaClient(0);

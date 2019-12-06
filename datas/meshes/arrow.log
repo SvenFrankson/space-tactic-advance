@@ -1,0 +1,121 @@
+Exporter version: 6.2.0, Blender version: 2.80 (sub 75)
+========= Conversion from Blender to Babylon.js =========
+	Scene settings used :
+		inline textures     :  false
+		Material Type       :  PBR
+		Positions Precision :  4
+		Normals Precision   :  3
+		UVs Precision       :  3
+		Vert Color Precision:  3
+		Mat Weight Precision:  2
+		texture directory   :  C:\Users\svent\Documents\SvenFrankson\space-tactic-advance\datas\meshes\
+	Python World class constructor completed
+	WARNING: No active camera has been assigned, or is not in a currently selected Blender layer
+	processing begun of mesh:  body-color-1
+		processing begun of material:  Color-1
+		num positions      :  200
+		num normals        :  200
+		num tangents       :  0
+		num uvs            :  0
+		num uvs2           :  0
+		num colors         :  800
+		num indices        :  924
+	processing begun of mesh:  wing-frame
+		processing begun of material:  Frame
+		num positions      :  157
+		num normals        :  157
+		num tangents       :  0
+		num uvs            :  0
+		num uvs2           :  0
+		num colors         :  628
+		num indices        :  588
+	processing begun of mesh:  body-base
+		processing begun of material:  Base
+		num positions      :  68
+		num normals        :  68
+		num tangents       :  0
+		num uvs            :  0
+		num uvs2           :  0
+		num colors         :  272
+		num indices        :  360
+	processing begun of mesh:  body-color-3
+		processing begun of material:  Color-3
+		num positions      :  33
+		num normals        :  33
+		num tangents       :  0
+		num uvs            :  0
+		num uvs2           :  0
+		num colors         :  132
+		num indices        :  138
+	processing begun of mesh:  body-frame
+		processing begun of material:  Frame
+		registered as also a user of material:  Frame
+		num positions      :  228
+		num normals        :  228
+		num tangents       :  0
+		num uvs            :  0
+		num uvs2           :  0
+		num colors         :  912
+		num indices        :  1116
+	processing begun of mesh:  body-base-dark
+		processing begun of material:  Base-Dark
+		num positions      :  96
+		num normals        :  96
+		num tangents       :  0
+		num uvs            :  0
+		num uvs2           :  0
+		num colors         :  384
+		num indices        :  288
+	processing begun of mesh:  body-color-2
+		processing begun of material:  Color-2
+		num positions      :  96
+		num normals        :  96
+		num tangents       :  0
+		num uvs            :  0
+		num uvs2           :  0
+		num colors         :  384
+		num indices        :  360
+	processing begun of mesh:  wing-color-1
+		processing begun of material:  Color-1
+		registered as also a user of material:  Color-1
+		num positions      :  63
+		num normals        :  63
+		num tangents       :  0
+		num uvs            :  0
+		num uvs2           :  0
+		num colors         :  252
+		num indices        :  279
+	processing begun of mesh:  wing-base
+		processing begun of material:  Base
+		registered as also a user of material:  Base
+		num positions      :  56
+		num normals        :  56
+		num tangents       :  0
+		num uvs            :  0
+		num uvs2           :  0
+		num colors         :  224
+		num indices        :  306
+	processing begun of mesh:  wing-base-dark
+		processing begun of material:  Base-Dark
+		registered as also a user of material:  Base-Dark
+		num positions      :  28
+		num normals        :  28
+		num tangents       :  0
+		num uvs            :  0
+		num uvs2           :  0
+		num colors         :  112
+		num indices        :  42
+========= Writing of JSON file started =========
+	writing mesh:  body-color-1
+	writing mesh:  wing-frame
+	writing mesh:  body-base
+	writing mesh:  body-color-3
+	writing mesh:  body-frame
+	writing mesh:  body-base-dark
+	writing mesh:  body-color-2
+	writing mesh:  wing-color-1
+	writing mesh:  wing-base
+	writing mesh:  wing-base-dark
+========= Writing of JSON file completed =========
+========= end of processing =========
+elapsed time:  0 min, 0.2692 secs

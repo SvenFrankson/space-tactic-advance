@@ -30,7 +30,7 @@ class SpaceShipSlots {
     constructor() {
         this._slots = new Map<string, SpaceShipSlot[]>();
         this._slots.set(
-            "body-1",
+            "arrow-body",
             [
                 new SpaceShipSlot("engine", new BABYLON.Vector3(0, 0, -1), new BABYLON.Vector3(0, 0, 0)),
                 new SpaceShipSlot("wingL", new BABYLON.Vector3(- 0.55, 0, -0.4), new BABYLON.Vector3(0, 0, 0)),

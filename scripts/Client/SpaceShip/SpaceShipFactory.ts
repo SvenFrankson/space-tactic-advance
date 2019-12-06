@@ -44,13 +44,13 @@ class SpaceShipFactory {
 	}
 
 	public static async LoadSpaceshipPart(
-		part: string,
-		scene: BABYLON.Scene,
+		spaceshipName: string,
+		partName: string,
 		baseColor: string,
 		detailColor: string
 	): Promise<BABYLON.Mesh> {
-		let data = await VertexDataLoader.instance.getColorized(part, baseColor, detailColor, "#ff0000", "#00ff00", "#0000ff");
-		let m = new BABYLON.Mesh(part, Main.Scene);
+		let data = await SpaceshipVertexDataLoader.instance.getSpaceshipPartVertexData(spaceshipName, partName, baseColor, detailColor, "#ff0000", "#00ff00", "#0000ff");
+		let m = new BABYLON.Mesh(spaceshipName + " " + partName, Main.Scene);
 		m.layerMask = 1;
 		data.applyToMesh(m);
 		m.material = SpaceShipFactory.cellShadingMaterial;

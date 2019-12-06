@@ -107,7 +107,7 @@ class SpaceShip extends BABYLON.Mesh {
 		spaceship: SpaceShip,
 		meshes?: BABYLON.Mesh[]
 	): Promise<BABYLON.TransformNode> {
-		let e = await SpaceShipFactory.LoadSpaceshipPart(elementData.name, Main.Scene, baseColor, detailColor);
+		let e = await SpaceShipFactory.LoadSpaceshipPart(elementData.name.split("-")[0], elementData.name.split("-")[1], baseColor, detailColor);
 		if (meshes) {
 			meshes.push(e);
 		}
