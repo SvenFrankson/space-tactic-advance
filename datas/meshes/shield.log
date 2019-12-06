@@ -13,13 +13,13 @@ Exporter version: 6.2.0, Blender version: 2.80 (sub 75)
 	WARNING: No active camera has been assigned, or is not in a currently selected Blender layer
 	processing begun of mesh:  wing-color-1
 		processing begun of material:  Color 1
-		num positions      :  90
-		num normals        :  90
+		num positions      :  86
+		num normals        :  86
 		num tangents       :  0
 		num uvs            :  0
 		num uvs2           :  0
-		num colors         :  360
-		num indices        :  303
+		num colors         :  344
+		num indices        :  297
 	processing begun of mesh:  wing-frame
 		processing begun of material:  Frame
 		num positions      :  124
@@ -54,4 +54,4 @@ Exporter version: 6.2.0, Blender version: 2.80 (sub 75)
 	writing mesh:  wing-base
 ========= Writing of JSON file completed =========
 ========= end of processing =========
-elapsed time:  0 min, 0.122 secs
+elapsed time:  0 min, 0.0803 secs
