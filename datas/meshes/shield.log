@@ -1,0 +1,57 @@
+Exporter version: 6.2.0, Blender version: 2.80 (sub 75)
+========= Conversion from Blender to Babylon.js =========
+	Scene settings used :
+		inline textures     :  false
+		Material Type       :  PBR
+		Positions Precision :  4
+		Normals Precision   :  3
+		UVs Precision       :  3
+		Vert Color Precision:  3
+		Mat Weight Precision:  2
+		texture directory   :  C:\Users\svent\Documents\SvenFrankson\space-tactic-advance\datas\meshes\
+	Python World class constructor completed
+	WARNING: No active camera has been assigned, or is not in a currently selected Blender layer
+	processing begun of mesh:  wing-color-1
+		processing begun of material:  Color 1
+		num positions      :  90
+		num normals        :  90
+		num tangents       :  0
+		num uvs            :  0
+		num uvs2           :  0
+		num colors         :  360
+		num indices        :  303
+	processing begun of mesh:  wing-frame
+		processing begun of material:  Frame
+		num positions      :  124
+		num normals        :  124
+		num tangents       :  0
+		num uvs            :  0
+		num uvs2           :  0
+		num colors         :  496
+		num indices        :  426
+	processing begun of mesh:  wing-color-2
+		processing begun of material:  Color 2
+		num positions      :  40
+		num normals        :  40
+		num tangents       :  0
+		num uvs            :  0
+		num uvs2           :  0
+		num colors         :  160
+		num indices        :  150
+	processing begun of mesh:  wing-base
+		processing begun of material:  Base
+		num positions      :  94
+		num normals        :  94
+		num tangents       :  0
+		num uvs            :  0
+		num uvs2           :  0
+		num colors         :  376
+		num indices        :  420
+========= Writing of JSON file started =========
+	writing mesh:  wing-color-1
+	writing mesh:  wing-frame
+	writing mesh:  wing-color-2
+	writing mesh:  wing-base
+========= Writing of JSON file completed =========
+========= end of processing =========
+elapsed time:  0 min, 0.122 secs

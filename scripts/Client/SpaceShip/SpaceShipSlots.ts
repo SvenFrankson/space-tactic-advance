@@ -39,7 +39,7 @@ class SpaceShipSlots {
             ]
         );
         this._slots.set(
-            "body-2",
+            "hubble-body",
             [
                 new SpaceShipSlot("engine", new BABYLON.Vector3(0, 0, -1), new BABYLON.Vector3(0, 0, 0)),
                 new SpaceShipSlot("wingL", new BABYLON.Vector3(- 0.48, 0, -0.27), new BABYLON.Vector3(0, 0, 0)),
@@ -48,7 +48,7 @@ class SpaceShipSlots {
             ]
         );
         this._slots.set(
-            "body-3",
+            "moon-body",
             [
                 new SpaceShipSlot("engine", new BABYLON.Vector3(0, 0, -0.7), new BABYLON.Vector3(0, 0, 0)),
                 new SpaceShipSlot("wingL", new BABYLON.Vector3(- 0.55, 0, -0.37), new BABYLON.Vector3(0, 0, 0)),
