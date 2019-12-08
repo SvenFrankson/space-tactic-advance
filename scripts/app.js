@@ -64,23 +64,37 @@ class AlphaBoard extends Board {
         this._boardMesh.isPickable = false;
     }
 }
+var AlphaCameraMode;
+(function (AlphaCameraMode) {
+    AlphaCameraMode[AlphaCameraMode["Free"] = 0] = "Free";
+    AlphaCameraMode[AlphaCameraMode["Focus"] = 1] = "Focus";
+    AlphaCameraMode[AlphaCameraMode["Wide"] = 2] = "Wide";
+})(AlphaCameraMode || (AlphaCameraMode = {}));
 class AlphaCamera extends BABYLON.ArcRotateCamera {
     constructor() {
         super("alpha-camera", 0, 0, 1, new BABYLON.Vector3(0, 0, 0), Main.Scene);
         this.currentRadius = 4;
+        this.currentMode = AlphaCameraMode.Focus;
         this._currentTargetPos = BABYLON.Vector3.Zero();
         this._update = () => {
-            if (this.currentTarget instanceof BABYLON.Vector3) {
-                this._currentTargetPos.copyFrom(this.currentTarget);
+            if (this.currentMode === AlphaCameraMode.Focus) {
+                this.currentRadius = 4;
+                if (this.currentTarget instanceof BABYLON.Vector3) {
+                    this._currentTargetPos.copyFrom(this.currentTarget);
+                }
+                else if (this.currentTarget instanceof BABYLON.AbstractMesh) {
+                    this._currentTargetPos.copyFrom(this.currentTarget.position);
+                }
             }
-            else if (this.currentTarget instanceof BABYLON.AbstractMesh) {
-                this._currentTargetPos.copyFrom(this.currentTarget.position);
+            else if (this.currentMode === AlphaCameraMode.Wide) {
+                this.currentRadius = 10;
+                this.alpha = 0;
+                this.beta = Math.PI / 16;
             }
-            else {
-                return;
+            if (this.currentMode != AlphaCameraMode.Free) {
+                BABYLON.Vector3.LerpToRef(this.target, this._currentTargetPos, 0.05, this.target);
+                this.radius = this.radius * 0.95 + this.currentRadius * 0.05;
             }
-            BABYLON.Vector3.LerpToRef(this.target, this._currentTargetPos, 0.05, this.target);
-            this.radius = this.radius * 0.95 + this.currentRadius * 0.05;
             let dir = 3 * Math.PI / 2 - this.alpha;
             if (dir !== this._lastDir) {
                 this._lastDir = dir;
@@ -96,6 +110,21 @@ class AlphaCamera extends BABYLON.ArcRotateCamera {
         this.wheelPrecision *= 8;
         Main.Camera = this;
         Main.Scene.onBeforeRenderObservable.add(this._update);
+    }
+    createPanel() {
+        this._panel = SpacePanel.CreateSpacePanel(false);
+        this._panel.addTitle1("CAMERA");
+        this._panel.style.width = "180px";
+        let l = Main.Canvas.width / 2 - 90;
+        this._panel.style.left = l.toFixed(0) + "px";
+        this._panel.style.bottom = "150px";
+        this._panel.addIconButtons("work/inkscape/camera-focus.svg", () => {
+            this.currentMode = AlphaCameraMode.Focus;
+            this.beta = Math.PI / 4;
+        }, "work/inkscape/camera-wide.svg", () => {
+            this.currentMode = AlphaCameraMode.Wide;
+            this._currentTargetPos.copyFromFloats(0, 0, 0);
+        });
     }
 }
 class Client {
@@ -636,8 +665,9 @@ class SpacePanel extends HTMLElement {
             this.style.bottom = ((1 - screenPos.y) * Main.Canvas.height - this.clientHeight * 0.5) + "px";
         };
     }
-    static CreateSpacePanel() {
+    static CreateSpacePanel(foldable = true) {
         let panel = document.createElement("space-panel");
+        panel._foldable = foldable;
         document.body.appendChild(panel);
         return panel;
     }
@@ -648,18 +678,20 @@ class SpacePanel extends HTMLElement {
         this._innerBorder = document.createElement("div");
         this._innerBorder.classList.add("space-panel-inner-border");
         this.appendChild(this._innerBorder);
-        this._toggleVisibilityInput = document.createElement("button");
-        this._toggleVisibilityInput.classList.add("space-panel-toggle-visibility");
-        this._toggleVisibilityInput.textContent = "^";
-        this._toggleVisibilityInput.addEventListener("click", () => {
-            if (this._isVisible) {
-                this.hide();
-            }
-            else {
-                this.show();
-            }
-        });
-        this._innerBorder.appendChild(this._toggleVisibilityInput);
+        if (this._foldable) {
+            this._toggleVisibilityInput = document.createElement("button");
+            this._toggleVisibilityInput.classList.add("space-panel-toggle-visibility");
+            this._toggleVisibilityInput.textContent = "^";
+            this._toggleVisibilityInput.addEventListener("click", () => {
+                if (this._isVisible) {
+                    this.hide();
+                }
+                else {
+                    this.show();
+                }
+            });
+            this._innerBorder.appendChild(this._toggleVisibilityInput);
+        }
         this._initialized = true;
     }
     dispose() {
@@ -671,7 +703,6 @@ class SpacePanel extends HTMLElement {
     show() {
         this._toggleVisibilityInput.textContent = "^";
         this._isVisible = true;
-        console.log("SHOW");
         this._htmlLines.forEach((l) => {
             l.style.display = "block";
         });
@@ -679,7 +710,6 @@ class SpacePanel extends HTMLElement {
     hide() {
         this._toggleVisibilityInput.textContent = "v";
         this._isVisible = false;
-        console.log("HIDE");
         this._htmlLines.forEach((l) => {
             l.style.display = "none";
         });
@@ -809,6 +839,33 @@ class SpacePanel extends HTMLElement {
             inputElement2.classList.add("space-button");
             inputElement2.setAttribute("type", "button");
             inputElement2.value = value2;
+            inputElement2.addEventListener("click", () => {
+                onClickCallback2();
+            });
+            lineElement.appendChild(inputElement2);
+            inputs.push(inputElement2);
+        }
+        this._innerBorder.appendChild(lineElement);
+        this._htmlLines.push(lineElement);
+        return inputs;
+    }
+    addIconButtons(imageUrl1, onClickCallback1, imageUrl2, onClickCallback2) {
+        let lineElement = document.createElement("div");
+        lineElement.classList.add("space-panel-line");
+        let inputElement1 = document.createElement("input");
+        inputElement1.classList.add("space-button-icon");
+        inputElement1.setAttribute("type", "button");
+        inputElement1.style.backgroundImage = "url(\"" + imageUrl1 + "\")";
+        inputElement1.addEventListener("click", () => {
+            onClickCallback1();
+        });
+        lineElement.appendChild(inputElement1);
+        let inputs = [inputElement1];
+        if (imageUrl2 && onClickCallback2) {
+            let inputElement2 = document.createElement("input");
+            inputElement2.classList.add("space-button-icon");
+            inputElement2.setAttribute("type", "button");
+            inputElement2.style.backgroundImage = "url(\"" + imageUrl2 + "\")";
             inputElement2.addEventListener("click", () => {
                 onClickCallback2();
             });
@@ -3340,6 +3397,7 @@ class Main {
     }
     initializeCamera() {
         Main.Camera = new AlphaCamera();
+        Main.Camera.createPanel();
     }
     async initialize() {
         await this.initializeScene();

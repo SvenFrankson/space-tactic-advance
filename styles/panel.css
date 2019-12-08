@@ -181,6 +181,20 @@ space-panel-label {
     color: lightgray;
 }
 
+.space-button-icon {
+    display: inline-block;
+    width: 64px;
+    height: 64px;
+    padding: 5px;
+    margin-left: 4%;
+    margin-right: 4%;
+    margin-top: 5px;
+    border: solid 1px white;
+    background-color: rgba(40, 66, 57, 0.8);
+    background-size: cover;
+    border-radius: 2px;
+}
+
 .space-button-inline {
     display: inline-block;
     width: 50%;

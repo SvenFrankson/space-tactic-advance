@@ -45,6 +45,7 @@ class Main {
 
 	public initializeCamera(): void {
 		Main.Camera = new AlphaCamera();
+		Main.Camera.createPanel();
 	}
 	
 	public async initialize(): Promise<void> {

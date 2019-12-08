@@ -85,9 +85,11 @@ class SpacePanel extends HTMLElement {
     private _htmlLines: HTMLElement[] = [];
     private _toggleVisibilityInput: HTMLButtonElement;
     private _isVisible: boolean = true;
+    private _foldable: boolean;
 
-    public static CreateSpacePanel(): SpacePanel {
+    public static CreateSpacePanel(foldable: boolean = true): SpacePanel {
         let panel = document.createElement("space-panel") as SpacePanel;
+        panel._foldable = foldable;
         document.body.appendChild(panel);
         return panel;
     }
@@ -104,18 +106,21 @@ class SpacePanel extends HTMLElement {
         this._innerBorder.classList.add("space-panel-inner-border");
         this.appendChild(this._innerBorder);
 
-        this._toggleVisibilityInput = document.createElement("button");
-        this._toggleVisibilityInput.classList.add("space-panel-toggle-visibility");
-        this._toggleVisibilityInput.textContent = "^";
-        this._toggleVisibilityInput.addEventListener("click", () => {
-            if (this._isVisible) {
-                this.hide();
-            }
-            else {
-                this.show();
-            }
-        });
-        this._innerBorder.appendChild(this._toggleVisibilityInput);
+        if (this._foldable) {
+            this._toggleVisibilityInput = document.createElement("button");
+            this._toggleVisibilityInput.classList.add("space-panel-toggle-visibility");
+            this._toggleVisibilityInput.textContent = "^";
+            this._toggleVisibilityInput.addEventListener("click", () => {
+                if (this._isVisible) {
+                    this.hide();
+                }
+                else {
+                    this.show();
+                }
+            });
+            this._innerBorder.appendChild(this._toggleVisibilityInput);
+        }
+        
         this._initialized = true;
     }
 
@@ -129,7 +134,6 @@ class SpacePanel extends HTMLElement {
     public show(): void {
         this._toggleVisibilityInput.textContent = "^";
         this._isVisible = true;
-        console.log("SHOW");
         this._htmlLines.forEach(
             (l) => {
                 l.style.display = "block";
@@ -140,7 +144,6 @@ class SpacePanel extends HTMLElement {
     public hide(): void {
         this._toggleVisibilityInput.textContent = "v";
         this._isVisible = false;
-        console.log("HIDE");
         this._htmlLines.forEach(
             (l) => {
                 l.style.display = "none";
@@ -315,6 +318,40 @@ class SpacePanel extends HTMLElement {
             inputElement2.classList.add("space-button");
             inputElement2.setAttribute("type", "button");
             inputElement2.value = value2;
+            inputElement2.addEventListener(
+                "click",
+                () => {
+                    onClickCallback2();
+                }
+            );
+            lineElement.appendChild(inputElement2);
+            inputs.push(inputElement2);
+        }
+        this._innerBorder.appendChild(lineElement);
+        this._htmlLines.push(lineElement);
+        return inputs;
+    }
+
+    public addIconButtons(imageUrl1: string, onClickCallback1: () => void, imageUrl2?: string, onClickCallback2?: () => void): HTMLInputElement[] {
+        let lineElement = document.createElement("div");
+        lineElement.classList.add("space-panel-line");
+        let inputElement1 = document.createElement("input");
+        inputElement1.classList.add("space-button-icon");
+        inputElement1.setAttribute("type", "button");
+        inputElement1.style.backgroundImage = "url(\"" + imageUrl1 + "\")";
+        inputElement1.addEventListener(
+            "click",
+            () => {
+                onClickCallback1();
+            }
+        );
+        lineElement.appendChild(inputElement1);
+        let inputs = [inputElement1];
+        if (imageUrl2 && onClickCallback2) {
+            let inputElement2 = document.createElement("input");
+            inputElement2.classList.add("space-button-icon");
+            inputElement2.setAttribute("type", "button");
+            inputElement2.style.backgroundImage = "url(\"" + imageUrl2 + "\")";
             inputElement2.addEventListener(
                 "click",
                 () => {
