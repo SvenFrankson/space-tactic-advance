@@ -302,6 +302,7 @@ class AlphaClient extends Client {
         super(team);
         AlphaClient.Instance = this;
         this._board = new AlphaBoard();
+        this._inspector = new AlphaInspector();
         new AlphaFighterSelector();
     }
     findFighter(filter) {
@@ -381,6 +382,7 @@ class AlphaClient extends Client {
     onPhaseInitialized() {
         let activeFighter = this.getActiveFighter();
         if (activeFighter) {
+            this._inspector.updateActive(activeFighter);
             Main.Camera.currentTarget = activeFighter.transformMesh;
             Main.Camera.currentRadius = 5;
             if (activeFighter.team === this._team) {
@@ -1242,6 +1244,15 @@ class AlphaFighter extends Fighter {
     shoot(target) {
         let dir = target.subtract(this.transformMesh.position).normalize();
         this.fighterMesh.shoot(dir);
+    }
+}
+class AlphaInspector {
+    constructor() {
+    }
+    updateActive(fighter) {
+        let name = fighter.pilot.name.toLocaleUpperCase();
+        document.querySelector("#inspector-left-name").textContent = name;
+        document.querySelector("#inspector-left-name").parentElement.querySelector("span").textContent = name;
     }
 }
 class SpaceMath {

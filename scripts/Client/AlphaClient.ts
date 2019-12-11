@@ -4,6 +4,8 @@ class AlphaClient extends Client {
 
     public static Instance: AlphaClient;
 
+    private _inspector: AlphaInspector;
+
     public get alphaBoard(): AlphaBoard {
         if (this._board instanceof AlphaBoard) {
             return this._board;
@@ -15,6 +17,7 @@ class AlphaClient extends Client {
         AlphaClient.Instance = this;
 
         this._board = new AlphaBoard();
+        this._inspector = new AlphaInspector();
         new AlphaFighterSelector();
     }
 
@@ -110,6 +113,7 @@ class AlphaClient extends Client {
     protected onPhaseInitialized(): void {
         let activeFighter = this.getActiveFighter() as AlphaFighter;
         if (activeFighter) {
+            this._inspector.updateActive(activeFighter);
             Main.Camera.currentTarget = activeFighter.transformMesh;
             Main.Camera.currentRadius = 5;
             if (activeFighter.team === this._team) {

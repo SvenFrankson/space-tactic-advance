@@ -10,6 +10,7 @@
   <script src="./scripts/app.js"></script>
   <script src="https://preview.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
   <link rel="stylesheet" type="text/css" href="./styles/app.css">
+  <link rel="stylesheet" type="text/css" href="./styles/inspector.css">
   <link rel="stylesheet" type="text/css" href="./styles/panel.css">
   <link rel="stylesheet" type="text/css" href="./styles/bubble.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Bangers">
@@ -21,6 +22,39 @@
     
   </div>
   <div id="bubble-speech-ruler"></div>
+
+  <div class="inspector inspector-left">
+    <div class="inspector-inner-border-left">
+      <div class="space-title-1-line">
+          <h1 id="inspector-left-name" class="space-title-1">UNNAMED</h1>
+          <span class="space-title-1-shadow">UNNAMED</span>
+      </div>
+      <div class="inspector-page-selection-line">
+        <button>OVERVIEW</button>
+        <button>SPACESHIP</button>
+        <button>PILOT</button>
+      </div>
+      <div class="inspector-overview-page-container">
+        <img class="inspector-overview-icon"/>
+        <div class="inspector-overview-stats-container">
+          <div class="inspector-overview-stat-line">Speed 42</div>
+          <div class="inspector-overview-stat-line">Move 3</div>
+        </div>
+      </div>
+      <div class="inspector-spaceship-page-container">
+
+      </div>
+      <div class="inspector-pilot-page-container">
+
+      </div>
+    </div>
+  </div>
+
+  <div class="inspector inspector-right">
+    <div class="inspector-inner-border-right">
+
+    </div>
+  </div>
 </body>
 
 </html>
