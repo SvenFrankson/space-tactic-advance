@@ -41,8 +41,6 @@ input[type=number]::-webkit-outer-spin-button {
     border: 1px solid white;
     color: white;
     font-family: "Orbitron Medium";
-    text-shadow: 
-        0 0 1px white;
     z-index: 1;
 }
 
@@ -84,55 +82,32 @@ input[type=number]::-webkit-outer-spin-button {
     border-top: 2px solid white;
 }
 
-space-panel-label {
+.inspector-overview-icon {
     display: inline-block;
-    width: 40%;
-    margin-left: 0;
-    margin-right: 0;
-    padding-right: 10px;
-    text-align: right;
+    width: 150px;
+}
+
+.inspector-overview-stats-container {
+    display: inline-block;
+    width: 150px;
+}
+
+.inspector-overview-stat-line {
+    font-size: 13px;
     font-family: "Orbitron Light";
-    border-bottom: dashed lightgray 1px;
-    color: lightgray;
 }
 
-.space-title-1-line {
-    margin-top: 0;
-    border-bottom: solid white 1px;
-    margin-bottom: 5px;
-    text-shadow: 
-        0 0 1px white,
-        0 0 2px white,
-        0 0 4px white;
+.inspector-overview-label {
+    display: inline-block;
+    width: 60%;
+    text-align: right;
+    margin-right: 10px;
 }
 
-.space-title-1 {
-    display: block;
-    margin-top: 0px;
-    padding-top: 0;
-    padding-bottom: 0;
-    font-family: "Anurati";
-}
-
-.space-title-1-shadow {
-    display: block;
-    padding-top: 0;
-    padding-bottom: 0;
-    margin-bottom: -32px;
-    color: #083325;
-    font-size: 16px;
-    transform: translateY(-32px);
-}
-
-.space-title-2 {
-    margin-top: 8px;
-    margin-bottom: 8px;
-    font-size: 18px;
-}
-
-.space-panel-line {
-    padding: 0;
-    margin-bottom: 5px;
+.inspector-overview-value {
+    display: inline-block;
+    width: 30%;
+    text-align: left;
 }
 
 .space-input {

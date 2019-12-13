@@ -943,6 +943,7 @@ class AlphaFighterSelector {
             this.selectedFighter = fighter;
             if (this.selectedFighter) {
                 this.selectedFighter.select();
+                AlphaInspector.Instance.updateSelected(this.selectedFighter);
             }
         }
     }
@@ -1247,12 +1248,33 @@ class AlphaFighter extends Fighter {
     }
 }
 class AlphaInspector {
+    static get Instance() {
+        if (!AlphaInspector._Instance) {
+            AlphaInspector._Instance = new AlphaInspector();
+        }
+        return AlphaInspector._Instance;
+    }
     constructor() {
+        AlphaInspector._Instance = this;
+    }
+    _updateInspector(inspectorElement, fighter) {
+        inspectorElement.querySelector(".space-title-1").textContent = fighter.pilot.name.toLocaleUpperCase();
+        inspectorElement.querySelector(".space-title-1-shadow").textContent = fighter.pilot.name.toLocaleUpperCase();
+        inspectorElement.querySelector(".speed-value").textContent = fighter.speed.toFixed(0);
+        inspectorElement.querySelector(".move-range-value").textContent = fighter.moveRange.toFixed(0);
+        inspectorElement.querySelector(".attack-power-value").textContent = fighter.attackPower.toFixed(0);
+        inspectorElement.querySelector(".attack-range-value").textContent = fighter.attackRange.toFixed(0);
+        inspectorElement.querySelector(".critical-rate-value").textContent = fighter.criticalRate.toFixed(0) + " %";
+        inspectorElement.querySelector(".accuracy-value").textContent = fighter.accuracy.toFixed(0) + " %";
+        inspectorElement.querySelector(".armor-value").textContent = fighter.armor.toFixed(0);
+        inspectorElement.querySelector(".dodge-value").textContent = fighter.dodgeRate.toFixed(0) + " %";
+        inspectorElement.querySelector(".shield-speed-value").textContent = fighter.shieldSpeed.toFixed(0);
     }
     updateActive(fighter) {
-        let name = fighter.pilot.name.toLocaleUpperCase();
-        document.querySelector("#inspector-left-name").textContent = name;
-        document.querySelector("#inspector-left-name").parentElement.querySelector("span").textContent = name;
+        this._updateInspector(document.querySelector(".inspector-left"), fighter);
+    }
+    updateSelected(fighter) {
+        this._updateInspector(document.querySelector(".inspector-right"), fighter);
     }
 }
 class SpaceMath {

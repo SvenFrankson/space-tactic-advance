@@ -46,6 +46,7 @@ class AlphaFighterSelector {
             this.selectedFighter = fighter;
             if (this.selectedFighter) {
                 this.selectedFighter.select();
+                AlphaInspector.Instance.updateSelected(this.selectedFighter);
             }
         }
     }
