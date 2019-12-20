@@ -114,7 +114,7 @@ class AlphaClient extends Client {
         let activeFighter = this.getActiveFighter() as AlphaFighter;
         if (activeFighter) {
             this._inspector.updateActive(activeFighter);
-            Main.Camera.currentTarget = activeFighter.transformMesh;
+            Main.Camera.activeTarget = activeFighter.transformMesh;
             Main.Camera.currentRadius = 5;
             if (activeFighter.team === this._team) {
                 activeFighter.showText(SpeechSituation.Ready);

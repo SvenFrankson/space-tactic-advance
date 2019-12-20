@@ -67,34 +67,91 @@ class AlphaBoard extends Board {
 var AlphaCameraMode;
 (function (AlphaCameraMode) {
     AlphaCameraMode[AlphaCameraMode["Free"] = 0] = "Free";
-    AlphaCameraMode[AlphaCameraMode["Focus"] = 1] = "Focus";
-    AlphaCameraMode[AlphaCameraMode["Wide"] = 2] = "Wide";
+    AlphaCameraMode[AlphaCameraMode["ToFocus"] = 1] = "ToFocus";
+    AlphaCameraMode[AlphaCameraMode["Focus"] = 2] = "Focus";
+    AlphaCameraMode[AlphaCameraMode["ToWide"] = 3] = "ToWide";
+    AlphaCameraMode[AlphaCameraMode["Wide"] = 4] = "Wide";
 })(AlphaCameraMode || (AlphaCameraMode = {}));
 class AlphaCamera extends BABYLON.ArcRotateCamera {
     constructor() {
         super("alpha-camera", 0, 0, 1, new BABYLON.Vector3(0, 0, 0), Main.Scene);
         this.currentRadius = 4;
-        this.currentMode = AlphaCameraMode.Focus;
+        this.currentMode = AlphaCameraMode.ToFocus;
         this._currentTargetPos = BABYLON.Vector3.Zero();
         this._update = () => {
-            if (this.currentMode === AlphaCameraMode.Focus) {
+            if (this.currentMode === AlphaCameraMode.ToFocus) {
+                let currentAlpha = 0;
+                this.alpha = this.alpha * 0.9 + currentAlpha * 0.1;
+                let currentBeta = Math.PI / 4;
+                this.beta = this.beta * 0.9 + currentBeta * 0.1;
                 this.currentRadius = 4;
-                if (this.currentTarget instanceof BABYLON.Vector3) {
-                    this._currentTargetPos.copyFrom(this.currentTarget);
+                this.radius = this.radius * 0.9 + this.currentRadius * 0.1;
+                if (this.activeTarget instanceof BABYLON.Vector3) {
+                    this._currentTargetPos.copyFrom(this.activeTarget);
                 }
-                else if (this.currentTarget instanceof BABYLON.AbstractMesh) {
-                    this._currentTargetPos.copyFrom(this.currentTarget.position);
+                else if (this.activeTarget instanceof BABYLON.AbstractMesh) {
+                    this._currentTargetPos.copyFrom(this.activeTarget.position);
                 }
-            }
-            else if (this.currentMode === AlphaCameraMode.Wide) {
-                this.currentRadius = 10;
-                this.alpha = 0;
-                this.beta = Math.PI / 16;
-            }
-            if (this.currentMode != AlphaCameraMode.Free) {
                 BABYLON.Vector3.LerpToRef(this.target, this._currentTargetPos, 0.05, this.target);
-                this.radius = this.radius * 0.95 + this.currentRadius * 0.05;
+                if (Math.abs(this.alpha - currentAlpha) < Math.PI / 360) {
+                    if (Math.abs(this.beta - currentBeta) < Math.PI / 360) {
+                        if (Math.abs(this.radius - this.currentRadius) < 0.005) {
+                            if (BABYLON.Vector3.DistanceSquared(this.target, this._currentTargetPos) < 0.005) {
+                                this.currentMode = AlphaCameraMode.Focus;
+                                this.alpha = currentAlpha;
+                                this.beta = currentBeta;
+                                this.radius = this.currentRadius;
+                            }
+                        }
+                    }
+                }
             }
+            if (this.currentMode === AlphaCameraMode.Focus) {
+                if (this.activeTarget instanceof BABYLON.Vector3) {
+                    this._currentTargetPos.copyFrom(this.activeTarget);
+                }
+                else if (this.activeTarget instanceof BABYLON.AbstractMesh) {
+                    this._currentTargetPos.copyFrom(this.activeTarget.position);
+                }
+                BABYLON.Vector3.LerpToRef(this.target, this._currentTargetPos, 0.05, this.target);
+            }
+            if (this.currentMode === AlphaCameraMode.ToWide) {
+                let currentAlpha = 0;
+                this.alpha = this.alpha * 0.9 + currentAlpha * 0.1;
+                let currentBeta = Math.PI / 16;
+                this.beta = this.beta * 0.9 + currentBeta * 0.1;
+                this.currentRadius = 10;
+                this.radius = this.radius * 0.9 + this.currentRadius * 0.1;
+                if (this.activeTarget instanceof BABYLON.Vector3) {
+                    this._currentTargetPos.copyFrom(this.activeTarget);
+                }
+                else if (this.activeTarget instanceof BABYLON.AbstractMesh) {
+                    this._currentTargetPos.copyFrom(this.activeTarget.position);
+                }
+                BABYLON.Vector3.LerpToRef(this.target, this._currentTargetPos, 0.05, this.target);
+                if (Math.abs(this.alpha - currentAlpha) < Math.PI / 360) {
+                    if (Math.abs(this.beta - currentBeta) < Math.PI / 360) {
+                        if (Math.abs(this.radius - this.currentRadius) < 0.005) {
+                            if (BABYLON.Vector3.DistanceSquared(this.target, this._currentTargetPos) < 0.005) {
+                                this.currentMode = AlphaCameraMode.Wide;
+                                this.alpha = currentAlpha;
+                                this.beta = currentBeta;
+                                this.radius = this.currentRadius;
+                            }
+                        }
+                    }
+                }
+            }
+            if (this.currentMode === AlphaCameraMode.Wide) {
+                if (this.activeTarget instanceof BABYLON.Vector3) {
+                    this._currentTargetPos.copyFrom(this.activeTarget);
+                }
+                else if (this.activeTarget instanceof BABYLON.AbstractMesh) {
+                    this._currentTargetPos.copyFrom(this.activeTarget.position);
+                }
+                BABYLON.Vector3.LerpToRef(this.target, this._currentTargetPos, 0.05, this.target);
+            }
+            this.target.y = 0;
             let dir = 3 * Math.PI / 2 - this.alpha;
             if (dir !== this._lastDir) {
                 this._lastDir = dir;
@@ -110,6 +167,25 @@ class AlphaCamera extends BABYLON.ArcRotateCamera {
         this.wheelPrecision *= 8;
         Main.Camera = this;
         Main.Scene.onBeforeRenderObservable.add(this._update);
+        Main.Scene.onPointerObservable.add((eventData) => {
+            if (eventData.type === BABYLON.PointerEventTypes.POINTERDOWN) {
+                if (eventData.event.button === 2) {
+                    this.currentMode = AlphaCameraMode.Free;
+                }
+            }
+        });
+    }
+    get activeTarget() {
+        return this._activeTarget;
+    }
+    set activeTarget(t) {
+        this._activeTarget = t;
+        if (this.currentMode === AlphaCameraMode.Focus) {
+            this.currentMode = AlphaCameraMode.ToFocus;
+        }
+        if (this.currentMode === AlphaCameraMode.Wide) {
+            this.currentMode = AlphaCameraMode.ToWide;
+        }
     }
     createPanel() {
         this._panel = SpacePanel.CreateSpacePanel(false);
@@ -119,11 +195,9 @@ class AlphaCamera extends BABYLON.ArcRotateCamera {
         this._panel.style.left = l.toFixed(0) + "px";
         this._panel.style.bottom = "150px";
         this._panel.addIconButtons("work/inkscape/camera-focus.svg", () => {
-            this.currentMode = AlphaCameraMode.Focus;
-            this.beta = Math.PI / 4;
+            this.currentMode = AlphaCameraMode.ToFocus;
         }, "work/inkscape/camera-wide.svg", () => {
-            this.currentMode = AlphaCameraMode.Wide;
-            this._currentTargetPos.copyFromFloats(0, 0, 0);
+            this.currentMode = AlphaCameraMode.ToWide;
         });
     }
 }
@@ -383,7 +457,7 @@ class AlphaClient extends Client {
         let activeFighter = this.getActiveFighter();
         if (activeFighter) {
             this._inspector.updateActive(activeFighter);
-            Main.Camera.currentTarget = activeFighter.transformMesh;
+            Main.Camera.activeTarget = activeFighter.transformMesh;
             Main.Camera.currentRadius = 5;
             if (activeFighter.team === this._team) {
                 activeFighter.showText(SpeechSituation.Ready);
@@ -2165,7 +2239,7 @@ class Projectile extends BABYLON.Mesh {
         if (vertexData && !this.isDisposed()) {
             vertexData.applyToMesh(this);
         }
-        Main.Camera.currentTarget = this;
+        Main.Camera.activeTarget = this;
     }
     destroy() {
         this.getScene().onBeforeRenderObservable.removeCallback(this._update);

@@ -89,7 +89,16 @@ input[type=number]::-webkit-outer-spin-button {
 
 .inspector-overview-stats-container {
     display: inline-block;
-    width: 150px;
+    width: 170px;
+}
+
+.inspector-overview-stat-group {
+    border-top: 1px solid white;
+    border-bottom: 1px solid white;
+    margin-top: 3px;
+    margin-bottom: 4px;
+    padding-top: 4px;
+    padding-bottom: 5px;
 }
 
 .inspector-overview-stat-line {
@@ -99,9 +108,10 @@ input[type=number]::-webkit-outer-spin-button {
 
 .inspector-overview-label {
     display: inline-block;
-    width: 60%;
+    width: 50%;
     text-align: right;
     margin-right: 10px;
+    font-size: 11px;
 }
 
 .inspector-overview-value {

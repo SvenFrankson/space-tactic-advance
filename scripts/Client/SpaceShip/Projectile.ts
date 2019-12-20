@@ -24,7 +24,7 @@ class Projectile extends BABYLON.Mesh {
         if (vertexData && !this.isDisposed()) {
             vertexData.applyToMesh(this);
         }
-        Main.Camera.currentTarget = this;
+        Main.Camera.activeTarget = this;
     }
 
     public destroy(): void {
